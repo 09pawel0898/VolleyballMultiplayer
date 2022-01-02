@@ -4,14 +4,27 @@ class MainMenuState(State):
     def __init__(self, context, state_manager):
         super().__init__(context,state_manager)
         self._init_resources()
+        # Sprites
+        self.sprite = None
+
+        self._init_state_content()
 
     def _init_resources(self):
-        self.context.resource_manager.load_resource(TextureID.TempTex, "res/img/level1.png")
+        self.context.texture_manager.load_resource(TextureID.Level1Background, "res/img/level1.png", Texture)
+        self.context.texture_manager.load_resource(TextureID.Ball, "res/img/ball.png", Texture)
+
+
+    def _init_state_content(self):
+        self.sprite = Sprite(self.state_manager.context.texture_manager.get_resource(TextureID.Ball),
+                             origin=Origin.TOP_LEFT)
+        self.sprite.set_size(200, 200)
+        self.sprite.set_origin(Origin.TOP_LEFT)
+        self.sprite.set_position(50, 50)
+        self.sprite.set_position(0, 50)
 
     def on_render(self) -> None:
-        img = self.state_manager.context.resource_manager.get_resource(TextureID.TempTex)
-        rect = img.get_rect()
-        self.context.window.blit(img,rect)
+        self.sprite.draw(self.context.window)
+
     def on_event(self, events: List[pygame.event.Event]) -> None:
         pass
 

@@ -3,11 +3,13 @@ from src.core.resourceManager import *
 from abc import ABC, abstractmethod
 import pygame.event
 from typing import List
+from src.core.sprite import *
+from src.core.texture import Texture
 
 class Context:
-    def __init__(self, window: pygame.Surface, resource_manager: ResourceManager) -> None:
+    def __init__(self, window: pygame.Surface, texture_manager: ResourceManager) -> None:
         self.window = window
-        self.resource_manager = resource_manager
+        self.texture_manager = texture_manager
 
 class State(ABC):
     def __init__(self, state_manager, context: Context) -> None:

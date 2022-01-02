@@ -5,7 +5,8 @@ import pygame
 ResType = TypeVar('ResType')
 
 class TextureID(Enum):
-    TempTex = 1
+    Level1Background = 1
+    Ball = 2
 
 class ResourceManager(Generic[ResType]):
     def __init__(self) -> None:
@@ -15,10 +16,13 @@ class ResourceManager(Generic[ResType]):
         if key not in self.resources:
             self.resources[key] = item
 
-    def load_resource(self, res_id, path):
-        new_resource = pygame.image.load(path).convert_alpha()
-        assert new_resource
-        self._insert_resource(res_id,new_resource)
+    def load_resource(self, res_id, path, resource_type: ResType):
+        new_resource = resource_type()
+        # any resource must provide load_from_file method
+        if new_resource.load_from_file(path):
+            self._insert_resource(res_id,new_resource)
+        else:
+            raise AssertionError
 
     def get_resource(self, key: str) -> ResType:
         assert(key in self.resources)

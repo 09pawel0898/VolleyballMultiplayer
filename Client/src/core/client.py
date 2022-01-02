@@ -1,13 +1,14 @@
 from src.core.stateManager import *
 from src.states.mainMenuState import *
 from src.states.gameplayState import *
+from src.core.texture import *
 
 class Client:
     def __init__(self, viewport_x: int, viewport_y: int) -> None:
         self._window = pygame.display.set_mode([viewport_x, viewport_y])
         self._running = False
-        self._resource_manager = ResourceManager[pygame.surface.Surface]()
-        self._context = Context(self._window,self._resource_manager)
+        self._texture_manager = ResourceManager[Texture]()
+        self._context = Context(self._window, self._texture_manager)
         self._state_manager = StateManager(self._context)
         self._init_states()
         self._get_ticks_last_frame = 0.0
