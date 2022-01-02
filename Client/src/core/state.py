@@ -1,5 +1,5 @@
 import pygame
-from src.core.resourceManager import ResourceManager
+from src.core.resourceManager import *
 from abc import ABC, abstractmethod
 import pygame.event
 from typing import List
@@ -16,7 +16,7 @@ class State(ABC):
         self.state_manager = state_manager
 
     @abstractmethod
-    def on_update(dt: float) -> None:
+    def on_update(self, dt: float) -> None:
         pass
 
     @abstractmethod

@@ -19,9 +19,8 @@ class StateManager:
     def __init__(self, context: Context) -> None:
         self._states = Stack()
         self._pending_actions : [PendingAction] = []
-        self._context = context
         self._state_constructors : {str,Callable} = {}
-
+        self.context = context
 
     def _create_state(self, state_name: str) -> State:
         assert(state_name in self._state_constructors)
@@ -39,7 +38,7 @@ class StateManager:
         self._pending_actions.clear()
 
     def register_state(self,state_name: str, state_type) -> None:
-        self._state_constructors[state_name] = lambda : state_type(self,self._context)
+        self._state_constructors[state_name] = lambda : state_type(self,self.context)
 
     def push_state(self, state_name: str) -> None:
         self._pending_actions.append(PendingAction(Action.ADD,state_name))

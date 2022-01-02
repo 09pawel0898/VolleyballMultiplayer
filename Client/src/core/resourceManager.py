@@ -1,16 +1,26 @@
-from typing import TypeVar, Generic
+from typing import Type, TypeVar, Generic, get_args
+from enum import Enum
+import pygame
 
-T = TypeVar('T')
+ResType = TypeVar('ResType')
 
-class ResourceManager(Generic[T]):
+class TextureID(Enum):
+    TempTex = 1
+
+class ResourceManager(Generic[ResType]):
     def __init__(self) -> None:
-        self.resources: dict[str,T] = {}
+        self.resources: dict[str,ResType] = {}
 
-    def init_resource(self, key:str, item: T) -> None:
+    def _insert_resource(self, key:str, item: ResType) -> None:
         if key not in self.resources:
             self.resources[key] = item
 
-    def get_resource(self, key: str) -> T:
+    def load_resource(self, res_id, path):
+        new_resource = pygame.image.load(path).convert_alpha()
+        assert new_resource
+        self._insert_resource(res_id,new_resource)
+
+    def get_resource(self, key: str) -> ResType:
         assert(key in self.resources)
         return self.resources[key]
 
