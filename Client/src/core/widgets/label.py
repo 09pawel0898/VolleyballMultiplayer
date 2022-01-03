@@ -4,7 +4,13 @@ from src.core.util.utilis import parse_color
 import pygame
 
 class Label(Widget):
-    def __init__(self, pos: Vec2, text, font_size, font_color='black', font='Arial', background="clear"):
+    def __init__(self,
+                 pos: Vec2,
+                 text: str,
+                 font_size: int,
+                 font_color:  str = 'black',
+                 font: str = 'Arial',
+                 background: str = "clear") -> None:
         super().__init__(pos)
         pygame.sprite.Sprite.__init__(self)
         self._text = text

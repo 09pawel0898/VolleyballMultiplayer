@@ -4,12 +4,10 @@ from src.core.widgets.label import Label
 class MainMenuState(State):
     def __init__(self, context, state_manager):
         super().__init__(context,state_manager)
-        self._init_resources()
-        self._init_widgets()
+
         # Sprites
         self.sprite = None
         self.background = None
-        #self.textboxGroup = pygame.sprite.OrderedUpdates()
         self._init_state_content()
 
     def _init_resources(self):
@@ -30,18 +28,18 @@ class MainMenuState(State):
         self.sprite.set_size(200, 200)
 
 
-    def on_render(self) -> None:
+    def _on_render(self) -> None:
         self.background.draw(self.context.window)
         self.sprite.draw(self.context.window)
         self.widget_manager.draw_widgets(self.context.window)
 
-    def on_event(self, events: List[pygame.event.Event]) -> None:
+    def _on_event(self, events: List[pygame.event.Event]) -> None:
         pass
 
-    def on_awake(self) -> None:
+    def _on_awake(self) -> None:
         pass
 
-    def on_update(self, dt: float) -> None:
+    def _on_update(self, dt: float) -> None:
         pass
 
 

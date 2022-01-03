@@ -2,6 +2,7 @@ from src.core.resources.texture import *
 from pygame import Surface
 from enum import Enum
 from src.core.util.vector import Vec2
+
 class Origin(Enum):
     TOP_LEFT = 1
     TOP_RIGHT = 2

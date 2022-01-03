@@ -16,19 +16,31 @@ class State(ABC):
         self.context = context
         self.state_manager = state_manager
         self.widget_manager = WidgetManager()
+        self._init_resources()
+        self._init_widgets()
 
+    #for initialize state content
     @abstractmethod
-    def on_update(self, dt: float) -> None:
+    def _init_resources(self) -> None:
         pass
 
     @abstractmethod
-    def on_render(self) -> None:
+    def _init_widgets(self) -> None:
+        pass
+
+    #for updating
+    @abstractmethod
+    def _on_update(self, dt: float) -> None:
         pass
 
     @abstractmethod
-    def on_event(self, events: List[pygame.event.Event]) -> None:
+    def _on_render(self) -> None:
         pass
 
     @abstractmethod
-    def on_awake(self) -> None:
+    def _on_event(self, events: List[pygame.event.Event]) -> None:
+        pass
+
+    @abstractmethod
+    def _on_awake(self) -> None:
         pass

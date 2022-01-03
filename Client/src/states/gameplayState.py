@@ -4,17 +4,22 @@ class GameplayState(State):
     def __init__(self, context, state_manager):
         super().__init__(context,state_manager)
 
-    def on_render(self) -> None:
-        print("RenderFromGameplayState")
-        pygame.draw.circle(self.context.window, (0, 0, 255), (250, 250), 75)
-
-    def on_event(self, events: List[pygame.event.Event]) -> None:
+    def _init_resources(self):
         pass
 
-    def on_awake(self) -> None:
+    def _init_widgets(self):
         pass
 
-    def on_update(self, dt: float) -> None:
-        print("UpdateFromGameplayState")
+    def _on_render(self):
+        pass
+
+    def _on_event(self, events: List[pygame.event.Event]):
+        pass
+
+    def _on_awake(self):
+        pass
+
+    def _on_update(self, dt: float):
+        pass
 
 

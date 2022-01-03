@@ -33,7 +33,7 @@ class StateManager:
             elif pending.action == Action.DELETE:
                 self._states.pop()
             if not self._states.is_empty():
-                self._states.top().on_awake()
+                self._states.top()._on_awake()
         self._pending_actions.clear()
 
     def register_state(self,state_name: str, state_type) -> None:
@@ -48,16 +48,16 @@ class StateManager:
 
     def on_render(self) -> None:
         if not self.is_empty():
-            self._states.top().on_render()
+            self._states.top()._on_render()
 
     def on_update(self, dt: float) -> None:
         if not self.is_empty():
-            self._states.top().on_update(dt)
+            self._states.top()._on_update(dt)
         self._do_pending_actions()
 
     def on_event(self, events: List[pygame.event.Event]) -> None:
         if not self.is_empty():
-            self._states.top().on_event(events)
+            self._states.top()._on_event(events)
         self._do_pending_actions()
 
     def is_empty(self) -> bool:

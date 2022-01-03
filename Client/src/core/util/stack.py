@@ -1,14 +1,14 @@
 class Stack:
-     def __init__(self):
+     def __init__(self) -> None:
          self.items = []
 
-     def is_empty(self):
+     def is_empty(self) -> bool:
          return self.items == []
 
-     def push(self, item):
+     def push(self, item) -> None:
          self.items.insert(0,item)
 
-     def count(self):
+     def count(self) -> int:
          return len(self.items)
 
      def pop(self):
@@ -17,5 +17,5 @@ class Stack:
      def top(self):
          return self.items[0]
 
-     def size(self):
+     def size(self) -> int:
          return len(self.items)
