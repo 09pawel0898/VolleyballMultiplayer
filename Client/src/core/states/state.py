@@ -1,11 +1,10 @@
-import pygame
-from src.core.resourceManager import *
+from src.core.resources.resourceManager import *
 from abc import ABC, abstractmethod
-import pygame.event
+from src.core.resources.sprite import *
+from src.core.widgets.widgetManager import WidgetManager
 from typing import List
-from src.core.sprite import *
-from src.core.texture import Texture
 
+# unique per application
 class Context:
     def __init__(self, window: pygame.Surface, texture_manager: ResourceManager) -> None:
         self.window = window
@@ -16,6 +15,7 @@ class State(ABC):
         super().__init__()
         self.context = context
         self.state_manager = state_manager
+        self.widget_manager = WidgetManager()
 
     @abstractmethod
     def on_update(self, dt: float) -> None:

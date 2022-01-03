@@ -1,4 +1,4 @@
-from src.core.state import *
+from src.core.states.state import *
 
 class GameplayState(State):
     def __init__(self, context, state_manager):

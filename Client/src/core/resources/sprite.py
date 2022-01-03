@@ -1,7 +1,7 @@
-from src.core.texture import *
+from src.core.resources.texture import *
 from pygame import Surface
 from enum import Enum
-
+from src.core.util.vector import Vec2
 class Origin(Enum):
     TOP_LEFT = 1
     TOP_RIGHT = 2
@@ -9,10 +9,6 @@ class Origin(Enum):
     BOTTOM_RIGHT = 4
     CENTER = 5
 
-class Vec2:
-    def __init__(self,x: int = 0, y: int = 0):
-        self.x = x
-        self.y = y
 
 class Sprite:
     def __init__(self, texture : Texture,
@@ -21,6 +17,8 @@ class Sprite:
         self.texture : Texture = texture
         self.origin : Origin = origin
         self.position : Vec2 = position
+        self.rotation : float = 0.0
+        self.rect = None
         self.set_origin(origin)
 
     def draw(self, window: Surface) -> None:
@@ -29,7 +27,6 @@ class Sprite:
     def set_size(self, x: int, y: int) -> None:
         pass
         self.texture.image = pygame.transform.scale(self.texture.image,(x,y))
-        self.texture.image = pygame.transform.flip(self.texture.image,True,True)
         self.set_origin(self.origin)
 
     def set_origin(self, origin: Origin) -> None:
@@ -52,6 +49,17 @@ class Sprite:
         self.position.x = self.rect.left = x
         self.position.y = self.rect.top = y
         self.set_origin(temp_origin)
+
+    def set_transparency(self, val: int):
+        self.texture.image.set_alpha(val)
+
+    def set_rotation(self, degree: float):
+        self.rotation = degree
+        self.texture.image = pygame.transform.rotate(self.texture.image,self.rotation)
+
+    def rotate(self, degree: float):
+        self.rotation += degree
+        self.texture.image = pygame.transform.rotate(self.texture.image, self.rotation)
 
     def move(self, vec : Vec2) -> None:
         self.position.x += vec.x
