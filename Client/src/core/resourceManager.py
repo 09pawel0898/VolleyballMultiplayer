@@ -6,7 +6,8 @@ ResType = TypeVar('ResType')
 
 class TextureID(Enum):
     Level1Background = 1
-    Ball = 2
+    MainMenuBackground = 2
+    Ball = 3
 
 class ResourceManager(Generic[ResType]):
     def __init__(self) -> None:

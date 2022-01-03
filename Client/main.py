@@ -2,7 +2,7 @@ from src.core.client import *
 import sys
 
 def main() -> int:
-    client = Client(1280,720)
+    client = Client(1080,540)
     client.run()
     return 0
 
