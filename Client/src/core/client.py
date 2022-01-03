@@ -2,7 +2,6 @@ from src.core.states.stateManager import *
 from src.states.mainMenuState import *
 from src.states.gameplayState import *
 from src.core.resources.texture import *
-from pygame_functions import *
 
 class Client:
     def __init__(self, viewport_x: int, viewport_y: int) -> None:

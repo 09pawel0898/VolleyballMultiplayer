@@ -1,5 +1,4 @@
 from src.core.states.state import *
-from pygame_functions import *
 from src.core.widgets.label import Label
 
 class MainMenuState(State):
