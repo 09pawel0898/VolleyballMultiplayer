@@ -1,10 +1,12 @@
 from src.core.states.state import *
 from src.core.widgets.label import Label
+from src.core.util.utilis import lerp
 
 class MainMenuState(State):
     def __init__(self, context, state_manager):
         super().__init__(context,state_manager)
         self._init_state_content()
+        self.bInputEnabled = False
 
     def _init_resources(self):
         self.context.texture_manager.load_resource(TextureID.Level1Background,
@@ -24,7 +26,7 @@ class MainMenuState(State):
         self.background = Sprite(self.state_manager.context.texture_manager.get_resource(TextureID.MainMenuBackground),
                              origin=Origin.TOP_LEFT)
         self.login_panel = Sprite(self.state_manager.context.texture_manager.get_resource(TextureID.LoginPanel),
-                             origin=Origin.TOP_LEFT)
+                             origin=Origin.TOP_LEFT, position=Vec2(0,500))
         self.sprite = Sprite(self.state_manager.context.texture_manager.get_resource(TextureID.Ball),
                              origin=Origin.TOP_LEFT)
         self.logo = Sprite(self.state_manager.context.texture_manager.get_resource(TextureID.Logo),
@@ -46,6 +48,10 @@ class MainMenuState(State):
         pass
 
     def _on_update(self, dt: float) -> None:
-        pass
+        #update login_panel animation
+        if self.login_panel.position.y > 0:
+            self.login_panel.set_position(0,lerp(self.login_panel.position.y,0.0,0.007))
+        else:
+            self.bInputEnabled = True
 
 

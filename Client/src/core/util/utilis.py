@@ -9,3 +9,7 @@ def parse_color(color):
         colourRGB.g = color[1]
         colourRGB.b = color[2]
         return colourRGB
+
+
+def lerp(a,b,alpha):
+    return a + (b-a) * alpha
