@@ -1,11 +1,15 @@
+import pygame
+
 from src.core.states.state import *
 from src.core.widgets.label import Label
+from src.core.widgets.button import Button
 from src.core.util.utilis import lerp, start_delayed
 
 class MainMenuState(State):
     def __init__(self, context, state_manager):
         super().__init__(context,state_manager)
         self._init_state_content()
+        self._init_widgets()
         self.bInputEnabled = False
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
@@ -21,10 +25,26 @@ class MainMenuState(State):
                                                    "res/img/logo.png", Texture)
         self.context.texture_manager.load_resource(TextureID.Clouds,
                                                    "res/img/clouds.png", Texture)
+        self.context.texture_manager.load_resource(TextureID.ButtonSignIn,
+                                                   "res/img/button_signin.png", Texture)
+        self.context.texture_manager.load_resource(TextureID.ButtonSignUp,
+                                                   "res/img/button_signup.png", Texture)
 
     def _init_widgets(self):
-        #self.widget_manager.init_widget("Label1",Label(Vec2(0, 0), "Welcome sportsman!", 77, font="Agency FB"))
-        pass
+        texture_manager = self.state_manager.context.texture_manager
+        self.widget_manager.init_widget("ButtonSignIn",
+                                        Button(Vec2(356,846),texture_manager.get_resource(TextureID.ButtonSignIn)))
+        self.widget_manager.init_widget("ButtonSignUp",
+                                        Button(Vec2(475, 918), texture_manager.get_resource(TextureID.ButtonSignUp)))
+
+        self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
+        self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
+
+    def _sign_in_onclick(self):
+        print("sign_in_")
+
+    def _sign_up_onclick(self):
+        print("sign_up_")
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -52,10 +72,15 @@ class MainMenuState(State):
         #logo
         self.logo.draw(self.context.window)
         #widgets
-        #self.widget_manager.draw_widgets(self.context.window)
+        self.widget_manager.draw_widgets(self.context.window)
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
-        pass
+        mouse_pos = pygame.mouse.get_pos()
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.bInputEnabled:
+                    self.widget_manager.get_widget("ButtonSignIn").check_for_onclick(mouse_pos)
+                    self.widget_manager.get_widget("ButtonSignUp").check_for_onclick(mouse_pos)
 
     def _on_awake(self) -> None:
         pass
@@ -64,12 +89,22 @@ class MainMenuState(State):
         self.bLogoAnimEnabled = True
 
     def _on_update(self, dt: float) -> None:
+        # update widgets
+        self.widget_manager.update_widgets()
+
         #update login_panel animation
+        button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
+        button_sign_up = self.widget_manager.get_widget("ButtonSignUp")
         if self.login_panel.position.y > 25:
             self.login_panel.set_position(0,lerp(self.login_panel.position.y,15.0,0.007))
+            button_sign_in.set_position(356,lerp(button_sign_in.pos.y,346, 0.007))
+            button_sign_up.set_position(475,lerp(button_sign_up.pos.y,418, 0.007))
         else:
+            button_sign_in.set_initial_pos(Vec2(356,356))
+            button_sign_up.set_initial_pos(Vec2(475,418))
             self.bInputEnabled = True
             start_delayed(0.6,self._enable_logo_anim)
+
 
         #update logo animation
         if self.bLogoAnimEnabled:
@@ -89,4 +124,6 @@ class MainMenuState(State):
             clouds.move(Vec2(0.3, 0))
             if clouds.position.x > self.context.window.get_width():
                 clouds.set_position(-self.context.window.get_width(), 0)
+
+
 

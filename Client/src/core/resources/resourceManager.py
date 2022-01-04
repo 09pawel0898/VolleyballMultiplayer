@@ -13,12 +13,14 @@ class TextureID(Enum):
     Ball = 5
     Logo = 6
     Clouds = 7
+    ButtonSignIn = 8
+    ButtonSignUp = 9
 
 class ResourceManager(Generic[ResType]):
     def __init__(self) -> None:
-        self.resources: dict[str,ResType] = {}
+        self.resources: dict[any,ResType] = {}
 
-    def _insert_resource(self, key:str, item: ResType) -> None:
+    def _insert_resource(self, key, item: ResType) -> None:
         if key not in self.resources:
             self.resources[key] = item
 

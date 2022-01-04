@@ -33,10 +33,12 @@ class Client:
 
 
     def _process_events(self) -> None:
-        for event in pygame.event.get():
+        temp_events = pygame.event.get()
+        self._state_manager.on_event(temp_events)
+        for event in temp_events:
             if event.type == pygame.QUIT:
                 self._running = False
-        self._state_manager.on_event(pygame.event.get())
+
 
     def run(self) -> None:
         self._running = True

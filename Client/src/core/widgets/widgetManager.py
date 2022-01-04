@@ -11,9 +11,13 @@ class WidgetManager:
         self._widgetsHolder.add(widget)
         self._insert_widget(name,widget)
 
-    def get_widget(self, name: str):
+    def get_widget(self, name: str) -> Widget:
         assert (name in self._widgetsDict)
         return self._widgetsDict[name]
+
+    def update_widgets(self):
+        for widget in self._widgetsDict.values():
+            widget.update()
 
     def draw_widgets(self, window):
         self._widgetsHolder.draw(window)
@@ -21,5 +25,4 @@ class WidgetManager:
     def _insert_widget(self, key, widget):
         if key not in self._widgetsDict:
             self._widgetsDict[key] = widget
-
 
