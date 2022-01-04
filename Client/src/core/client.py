@@ -36,8 +36,6 @@ class Client:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._running = False
-            if event.type == pygame.KEYUP:
-                self._state_manager.pop_state()
         self._state_manager.on_event(pygame.event.get())
 
     def run(self) -> None:

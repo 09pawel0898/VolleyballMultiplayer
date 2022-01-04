@@ -1,4 +1,6 @@
 from pygame import Color
+from typing import Callable
+import threading
 
 def parse_color(color):
     if type(color) == str:
@@ -13,3 +15,6 @@ def parse_color(color):
 
 def lerp(a,b,alpha):
     return a + (b-a) * alpha
+
+def start_delayed(delay: float, func: Callable):
+    threading.Timer(delay,func).start()
