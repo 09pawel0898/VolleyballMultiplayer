@@ -109,24 +109,16 @@ class TextBox(Widget):
             else:
                 # use the unicode char
                 self.text += unicode
-
         elif key == 8:
             # backspace. repeat until clear
             next_time = pygame.time.get_ticks() + 200
-            deleting = True
-            while deleting:
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_BACKSPACE]:
-                    this_time = pygame.time.get_ticks()
-                    if this_time > next_time:
-                        self.text = self.text[0:len(self.text) - 1]
-                        self.image.fill((255, 255, 255))
-                        pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
-                        self.image.blit(self.font.render(self.text, True, self.fontColour), [10, 5])
-                        next_time = this_time + 50
-                        pygame.event.clear()
-                else:
-                    deleting = False
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_BACKSPACE]:
+                self.text = self.text[0:len(self.text) - 1]
+                self.image.fill((255, 255, 255))
+                pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
+                self.image.blit(self.font.render(self.text, True, self.fontColour), [10, 5])
+                pygame.event.clear()
 
         if self.background != "clear":
             self.image.fill(parse_color(self.background))
