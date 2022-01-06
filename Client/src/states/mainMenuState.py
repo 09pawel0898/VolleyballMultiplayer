@@ -33,10 +33,15 @@ class MainMenuState(State):
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
         self.widget_manager.init_widget("ButtonSignIn",
-                                        Button(Vec2(356,846),texture_manager.get_resource(TextureID.ButtonSignIn)))
+                                        Button(Vec2(356,834),texture_manager.get_resource(TextureID.ButtonSignIn)))
         self.widget_manager.init_widget("ButtonSignUp",
-                                        Button(Vec2(475, 918), texture_manager.get_resource(TextureID.ButtonSignUp)))
-        self.widget_manager.init_widget("LoginInputBox", TextBox(Vec2(526,290),"Eldo",100,1,10,"Agency FB",20,))
+                                        Button(Vec2(475, 906), texture_manager.get_resource(TextureID.ButtonSignUp)))
+        self.widget_manager.init_widget("LoginInputBox", TextBox(Vec2(485,695),"username",200,1,16,
+                                                                 "Agency FB",28,"clear", False))
+        self.widget_manager.init_widget("PasswordInputBox", TextBox(Vec2(485, 765), "******", 200, 1, 16,
+                                                                    "Agency FB", 28, "clear", False,True))
+
+        self.temp_initial_widgets_ys = [834,906,695,765]
 
         self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
         self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
@@ -59,6 +64,7 @@ class MainMenuState(State):
         self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT)
         self.login_panel = Sprite(texture_manager.get_resource(
             TextureID.LoginPanel), origin=Origin.TOP_LEFT, position=Vec2(0,500))
+        self.login_panel_init_pos = self.login_panel.position.y
 
 
 
@@ -77,13 +83,17 @@ class MainMenuState(State):
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         self.widget_manager.get_widget("LoginInputBox").handle_input_events(events)
+        self.widget_manager.get_widget("PasswordInputBox").handle_input_events(events)
 
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.bInputEnabled:
                     self.widget_manager.get_widget("ButtonSignIn").check_for_onclick()
                     self.widget_manager.get_widget("ButtonSignUp").check_for_onclick()
-                    self.widget_manager.get_widget("LoginInputBox").check_for_onclick()
+                    if self.widget_manager.get_widget("LoginInputBox").check_for_onclick():
+                        self.widget_manager.get_widget("PasswordInputBox").enable_input_to_this(False)
+                    elif self.widget_manager.get_widget("PasswordInputBox").check_for_onclick():
+                        self.widget_manager.get_widget("LoginInputBox").enable_input_to_this(False)
 
     def _on_awake(self) -> None:
         pass
@@ -98,16 +108,20 @@ class MainMenuState(State):
         #update login_panel animation
         button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
         button_sign_up = self.widget_manager.get_widget("ButtonSignUp")
+        login_input_box = self.widget_manager.get_widget("LoginInputBox")
+        password_input_box = self.widget_manager.get_widget("PasswordInputBox")
         if self.login_panel.position.y > 25:
-            self.login_panel.set_position(0,lerp(self.login_panel.position.y,15.0,0.007))
-            button_sign_in.set_position(356,lerp(button_sign_in.pos.y,346, 0.007))
-            button_sign_up.set_position(475,lerp(button_sign_up.pos.y,418, 0.007))
-        else:
+            offset = self.login_panel_init_pos - lerp(self.login_panel.position.y,15.0,0.007)
+            self.login_panel.set_position(0,self.login_panel_init_pos - offset)
+            button_sign_in.set_position(356,self.temp_initial_widgets_ys[0] - offset)
+            button_sign_up.set_position(475,self.temp_initial_widgets_ys[1] - offset)
+            login_input_box.set_position(485,self.temp_initial_widgets_ys[2] - offset)
+            password_input_box.set_position(485,self.temp_initial_widgets_ys[3] - offset)
+        elif not self.bInputEnabled:
             button_sign_in.set_initial_pos(Vec2(356,356))
             button_sign_up.set_initial_pos(Vec2(475,418))
             self.bInputEnabled = True
             start_delayed(0.6,self._enable_logo_anim)
-
 
         #update logo animation
         if self.bLogoAnimEnabled:

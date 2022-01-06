@@ -12,10 +12,12 @@ class TextBox(Widget):
                  font,
                  font_size,
                  background = "white",
-                 border = True):
+                 border = True,
+                 hide_chars = False):
         super().__init__(pos)
         pygame.sprite.Sprite.__init__(self)
         self.text = ""
+        self.textDisplayed = ""
         self.width = width
         self.case = case
         self.maxLength = max_length
@@ -25,6 +27,7 @@ class TextBox(Widget):
         self.border = border
         self.initialText = initial_text
         self.boxSize = int(font_size * 1.7)
+        self.bHideChars = hide_chars
         self.bInitialized = False
         self.bCovered = False
         self.bInputEnabled = False
@@ -42,6 +45,7 @@ class TextBox(Widget):
 
         if self.border is not False:
             pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
+
         self.rect = self.image.get_rect()
         self.fontFace = pygame.font.match_font(self.font)
         self.fontColour = pygame.Color("black")
@@ -60,20 +64,18 @@ class TextBox(Widget):
         mouse_pos = pygame.mouse.get_pos()
         if self._cursor_in_bounds(mouse_pos):
             self.bCovered = True
-            #print("Covered")
         else:
-            #print("NotCovered")
             self.bCovered = False
 
     def check_for_onclick(self):
         if self.bCovered:
             if not self.bInputEnabled:
-                print("InputEnabled")
                 self.enable_input_to_this(True)
+                return True
+        return False
 
     def enable_input_to_this(self, enabled):
         self.bInputEnabled = enabled
-
 
     def _cursor_in_bounds(self, mouse_pos):
         if self.rect.left <= mouse_pos[0] <= self.rect.right and self.rect.top <= mouse_pos[1] <= self.rect.bottom:
@@ -86,53 +88,70 @@ class TextBox(Widget):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        self.clear()
+                        pass
                     elif event.key == pygame.K_ESCAPE:
                         self.enable_input_to_this(False)
-                        #self.image.blit(self.font.render(self.initialText, True, self.initialColour), [10, 5])
+                        if len(self.textDisplayed) == 0:
+                            self._refresh_rendered_enitities(True)
                         print("InputDisabled")
-                    elif event.key != pygame.K_ESCAPE:
+                    else:
                         self._try_add_character(event)
 
+    def _refresh_rendered_enitities(self, initial_text : bool):
+        self.image = pygame.Surface((self.width, self.boxSize), pygame.SRCALPHA, 32)
+        if self.background != "clear":
+            self.image.fill(parse_color(self.background))
+        if self.border is not False:
+            pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
+        if not initial_text:
+            self.image.blit(self.font.render(self.textDisplayed, True, self.fontColour), [10, 5])
+        else:
+            self.image.blit(self.font.render(self.initialText, True, self.initialColour), [10, 5])
 
     def _try_add_character(self, key_event : pygame.event.Event):
         pass
         key = key_event.key
         unicode = key_event.unicode
-        if (31 < key < 127 or 255 < key < 266) and (
-                self.maxLength == 0 or len(self.text) < self.maxLength):  # only printable characters
+        if (32 < key < 127) and (
+                self.maxLength == 0 or len(self.textDisplayed) < self.maxLength):  # only printable characters
             if key_event.mod in (1, 2,4096) and self.case == 1 and 97 <= key <= 122:
                 # force lowercase letters
-                self.text += chr(key)
+                self.text +=chr(key)
+                if self.bHideChars:
+                    self.textDisplayed += "*"
+                else:
+                    self.textDisplayed += chr(key)
             elif key_event.mod == 0 and self.case == 2 and 97 <= key <= 122:
                 self.text += chr(key - 32)
+                if self.bHideChars:
+                    self.textDisplayed += "*"
+                else:
+                    self.textDisplayed += chr(key - 32)
             else:
                 # use the unicode char
                 self.text += unicode
+                if self.bHideChars:
+                    self.textDisplayed += "*"
+                else:
+                    self.textDisplayed += unicode
+
         elif key == 8:
-            # backspace. repeat until clear
-            next_time = pygame.time.get_ticks() + 200
+            # backspace pressed
             keys = pygame.key.get_pressed()
             if keys[pygame.K_BACKSPACE]:
-                self.text = self.text[0:len(self.text) - 1]
-                self.image.fill((255, 255, 255))
-                pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
-                self.image.blit(self.font.render(self.text, True, self.fontColour), [10, 5])
+                self.textDisplayed = self.textDisplayed[0:len(self.textDisplayed) - 1]
                 pygame.event.clear()
+        self._refresh_rendered_enitities(False)
 
-        if self.background != "clear":
-            self.image.fill(parse_color(self.background))
+    def set_position(self, x: int, y: int) -> None:
+        self.pos.x = self.rect.left = x
+        self.pos.y = self.rect.top = y
 
-        if self.border is not False:
-            pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
-
-        self.image.blit(self.font.render(self.text, True, self.fontColour), [10, 5])
-
-    def move(self, x_pos, y_pos, centre=False):
-        if centre:
-            self.rect.topleft = [x_pos, y_pos]
-        else:
-            self.rect.center = [x_pos, y_pos]
+    def move(self, vec: Vec2) -> None:
+        self.pos.x += vec.x
+        self.pos.y += vec.y
+        self.rect.left = self.pos.x
+        self.rect.top = self.pos.y
 
     def clear(self):
         if self.background != "clear":
@@ -140,4 +159,5 @@ class TextBox(Widget):
 
         if self.border is not False:
             pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
+        self.image.fill((255, 255, 255))
         self.image.blit(self.font.render(self.initialText, True, self.initialColour), [10, 5])

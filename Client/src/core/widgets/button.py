@@ -33,6 +33,9 @@ class Button(Widget):
     def set_initial_pos(self, pos : Vec2):
         self._initial_pos = pos
 
+    def get_initial_pos(self):
+        return self._initial_pos
+
     def update(self):
         mouse_pos = pygame.mouse.get_pos()
         if self._cursor_in_bounds(mouse_pos):
@@ -52,5 +55,6 @@ class Button(Widget):
     def move(self, vec : Vec2) -> None:
         self.pos.x += vec.x
         self.pos.y += vec.y
+        self.rect.left = self.pos.x
         self.rect.top = self.pos.y
 
