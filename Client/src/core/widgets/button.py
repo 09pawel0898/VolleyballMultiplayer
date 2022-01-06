@@ -14,7 +14,7 @@ class Button(Widget):
         self.rect.topleft = [self.pos.x, self.pos.y]
         self._callback : Callable = None
         self._initial_pos = pos
-        self.covered = False
+        self.bCovered = False
 
     def _cursor_in_bounds(self, mouse_pos):
         if self.rect.left <= mouse_pos[0] <= self.rect.right and self.rect.top <= mouse_pos[1] <= self.rect.bottom:
@@ -22,8 +22,8 @@ class Button(Widget):
         else:
             return False
 
-    def check_for_onclick(self, mouse_pos):
-        if self.covered:
+    def check_for_onclick(self):
+        if self.bCovered:
             if self._callback is not None:
                 self._callback()
 
@@ -36,10 +36,10 @@ class Button(Widget):
     def update(self):
         mouse_pos = pygame.mouse.get_pos()
         if self._cursor_in_bounds(mouse_pos):
-            self.covered = True
+            self.bCovered = True
             self.set_position(lerp(self.pos.x,self._initial_pos.x + 7,0.155),self.pos.y)
         else:
-            self.covered = False
+            self.bCovered = False
             self.set_position(lerp(self.pos.x, self._initial_pos.x, 0.155), self.pos.y)
 
     def render(self):
@@ -52,6 +52,5 @@ class Button(Widget):
     def move(self, vec : Vec2) -> None:
         self.pos.x += vec.x
         self.pos.y += vec.y
-        self.rect.left = self.pos.x
         self.rect.top = self.pos.y
 

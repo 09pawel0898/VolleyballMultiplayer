@@ -1,8 +1,8 @@
 import pygame
 
 from src.core.states.state import *
-from src.core.widgets.label import Label
 from src.core.widgets.button import Button
+from src.core.widgets.textbox import TextBox
 from src.core.util.utilis import lerp, start_delayed
 
 class MainMenuState(State):
@@ -36,6 +36,7 @@ class MainMenuState(State):
                                         Button(Vec2(356,846),texture_manager.get_resource(TextureID.ButtonSignIn)))
         self.widget_manager.init_widget("ButtonSignUp",
                                         Button(Vec2(475, 918), texture_manager.get_resource(TextureID.ButtonSignUp)))
+        self.widget_manager.init_widget("LoginInputBox", TextBox(Vec2(526,290),"Eldo",100,1,10,"Agency FB",20,))
 
         self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
         self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
@@ -75,12 +76,14 @@ class MainMenuState(State):
         self.widget_manager.draw_widgets(self.context.window)
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
-        mouse_pos = pygame.mouse.get_pos()
+        self.widget_manager.get_widget("LoginInputBox").handle_input_events(events)
+
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.bInputEnabled:
-                    self.widget_manager.get_widget("ButtonSignIn").check_for_onclick(mouse_pos)
-                    self.widget_manager.get_widget("ButtonSignUp").check_for_onclick(mouse_pos)
+                    self.widget_manager.get_widget("ButtonSignIn").check_for_onclick()
+                    self.widget_manager.get_widget("ButtonSignUp").check_for_onclick()
+                    self.widget_manager.get_widget("LoginInputBox").check_for_onclick()
 
     def _on_awake(self) -> None:
         pass

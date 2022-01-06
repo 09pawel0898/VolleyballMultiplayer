@@ -19,7 +19,7 @@ class Label(Widget):
         self._font_size = font_size
         self._background = background
         self._font = pygame.font.Font(self._font_face, self._font_size)
-        self._update_rendered_content()
+        self.update_rendered_content()
         self.rect.topleft = [self.pos.x, self.pos.y]
 
     def update(self):
@@ -31,10 +31,10 @@ class Label(Widget):
     def set_text(self, new_text: str):
         self._text = new_text
         old_top_left = self.rect.topleft
-        self._update_rendered_content()
+        self.update_rendered_content()
         self.rect.topleft = old_top_left
 
-    def _update_rendered_content(self):
+    def update_rendered_content(self):
         line_surfaces = []
         text_lines = self._text.split("<br>")
         max_width , max_height = 0, 0
