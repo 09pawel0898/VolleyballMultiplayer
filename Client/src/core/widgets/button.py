@@ -58,13 +58,13 @@ class Button(Widget):
             if self._behaviour == ButtonBehaviour.NoBehaviour:
                 pass
             elif self._behaviour == ButtonBehaviour.SlideRight:
-                self.set_position(lerp(self.pos.x, self._initial_pos.x + 7, 0.155), self.pos.y)
+                self.set_position(lerp(self.pos.x, self._initial_pos.x + 3, dt*0.015), self.pos.y)
             self.bCovered = True
         else:
             if self._behaviour == ButtonBehaviour.NoBehaviour:
                 pass
             elif self._behaviour == ButtonBehaviour.SlideRight:
-                self.set_position(lerp(self.pos.x, self._initial_pos.x, 0.155), self.pos.y)
+                self.set_position(lerp(self.pos.x, self._initial_pos.x, dt*0.015), self.pos.y)
             self.bCovered = False
 
     def render(self):

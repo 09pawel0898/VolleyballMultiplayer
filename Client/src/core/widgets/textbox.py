@@ -70,11 +70,11 @@ class TextBox(Widget):
     def check_for_onclick(self):
         if self.bCovered:
             if not self.bInputEnabled:
-                self.enable_input_to_this(True)
+                self.enable_input(True)
                 return True
         return False
 
-    def enable_input_to_this(self, enabled):
+    def enable_input(self, enabled):
         self.bInputEnabled = enabled
         if not enabled and len(self.textDisplayed) == 0:
             self._refresh_rendered_enitities(True)
@@ -94,7 +94,7 @@ class TextBox(Widget):
                     if event.key == pygame.K_RETURN:
                         pass
                     elif event.key == pygame.K_ESCAPE:
-                        self.enable_input_to_this(False)
+                        self.enable_input(False)
                         if len(self.textDisplayed) == 0:
                             self._refresh_rendered_enitities(True)
                     else:
@@ -159,8 +159,12 @@ class TextBox(Widget):
     def clear(self):
         if self.background != "clear":
             self.image.fill(parse_color(self.background))
+        self.text = ""
+        self.textDisplayed = ""
+        self._refresh_rendered_enitities(True)
 
-        if self.border is not False:
-            pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
-        self.image.fill((255, 255, 255))
-        self.image.blit(self.font.render(self.initialText, True, self.initialColour), [10, 5])
+        #if self.border is not False:
+        #    pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
+        #self.image.fill((255, 255, 255))
+        #self.image.blit(self.font.render(self.initialText, True, self.initialColour), [10, 5])
+

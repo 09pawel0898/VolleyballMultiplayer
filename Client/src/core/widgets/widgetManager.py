@@ -33,7 +33,10 @@ class WidgetManager:
             self._widgetsDict[key] = widget
 
     def deactivate_textboxes_but_one(self, textbox: TextBox):
+        self.deactivate_textboxes()
+        textbox.enable_input(True)
+
+    def deactivate_textboxes(self):
         for widget in self._widgetsDict.values():
-            if isinstance(widget,TextBox):
-                widget.enable_input_to_this(False)
-        textbox.enable_input_to_this(True)
+            if isinstance(widget, TextBox):
+                widget.enable_input(False)

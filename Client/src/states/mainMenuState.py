@@ -56,9 +56,9 @@ class MainMenuState(State):
                                         Button(Vec2(475, 906),
                                         texture_manager.get_resource(TextureID.ButtonSignUp),
                                         ButtonBehaviour.SlideRight))
-        self.widget_manager.init_widget("LoginInputBoxLP", TextBox(Vec2(485, 695), "username", 200, 1, 16,
+        self.widget_manager.init_widget("LoginInputBoxLP", TextBox(Vec2(485, 695), "username", 240, 1, 16,
                                                                    "Agency FB", 28, "clear", False))
-        self.widget_manager.init_widget("PasswordInputBoxLP", TextBox(Vec2(485, 765), "******", 200, 1, 16,
+        self.widget_manager.init_widget("PasswordInputBoxLP", TextBox(Vec2(485, 765), "******", 240, 1, 16,
                                                                       "Agency FB", 28, "clear", False, True))
         # Y positions for animations, initial(behind the screen) and final
         self.temp_initial_lp_widgets_ys = [834, 906, 695, 765]
@@ -76,11 +76,11 @@ class MainMenuState(State):
                                         Button(Vec2(490, 900),
                                         texture_manager.get_resource(TextureID.ButtonRegister),
                                         ButtonBehaviour.NoBehaviour))
-        self.widget_manager.init_widget("LoginInputBoxRP", TextBox(Vec2(485, 630), "username", 200, 1, 16,
+        self.widget_manager.init_widget("LoginInputBoxRP", TextBox(Vec2(485, 630), "username", 240, 1, 16,
                                                                    "Agency FB", 25, "clear", False))
-        self.widget_manager.init_widget("PasswordInputBoxRP", TextBox(Vec2(485, 695), "******", 200, 1, 16,
+        self.widget_manager.init_widget("PasswordInputBoxRP", TextBox(Vec2(485, 695), "******", 240, 1, 16,
                                                                       "Agency FB", 25, "clear", False, True))
-        self.widget_manager.init_widget("PasswordConfirmInputBoxRP", TextBox(Vec2(485, 765), "******", 200, 1, 16,
+        self.widget_manager.init_widget("PasswordConfirmInputBoxRP", TextBox(Vec2(485, 765), "******", 240, 1, 16,
                                                                       "Agency FB", 25, "clear", False, True))
         self.widget_manager.init_widget("EmailInputBoxRP", TextBox(Vec2(485, 832), "email", 240, 1,22,
                                                                    "Agency FB", 25, "clear", False))
@@ -117,7 +117,8 @@ class MainMenuState(State):
 
     #button onclick handlers
     def _sign_in_onclick(self):
-        self._show_msg_box("Mess",)
+        self._show_msg_box("Mess")
+        self.widget_manager.deactivate_textboxes()
 
     def _sign_up_onclick(self):
         self.UIAnimState = UIAnimState.LoginPanelSlideOut
@@ -189,6 +190,8 @@ class MainMenuState(State):
                         elif self.widget_manager.get_widget("PasswordInputBoxLP").check_for_onclick():
                             self.widget_manager.deactivate_textboxes_but_one(
                                 self.widget_manager.get_widget("PasswordInputBoxLP"))
+                        else:
+                            self.widget_manager.deactivate_textboxes()
 
                     #register panel is visible
                     elif self.UIAnimState == UIAnimState.RegisterPanelVisible:
@@ -206,6 +209,8 @@ class MainMenuState(State):
                         elif self.widget_manager.get_widget("EmailInputBoxRP").check_for_onclick():
                             self.widget_manager.deactivate_textboxes_but_one(
                                 self.widget_manager.get_widget("EmailInputBoxRP"))
+                        else:
+                            self.widget_manager.deactivate_textboxes()
                     elif self.UIAnimState == UIAnimState.MessageBoxShowed:
                         self.msgButton.check_for_onclick()
 
@@ -249,6 +254,8 @@ class MainMenuState(State):
             elif not self.bInputEnabled:
                 attached_widgets[0].set_initial_pos(Vec2(attached_widgets[0].pos.x, 834))
                 attached_widgets[1].set_initial_pos(Vec2(attached_widgets[1].pos.x, 906))
+                attached_widgets[2].clear()
+                attached_widgets[3].clear()
                 self.bInputEnabled = False
                 self.UIAnimState = UIAnimState.RegisterPanelSlideIn
 
@@ -286,6 +293,10 @@ class MainMenuState(State):
             elif not self.bInputEnabled:
                 attached_widgets[0].set_initial_pos(Vec2(376, 916))
                 attached_widgets[1].set_initial_pos(Vec2(490, 920))
+                attached_widgets[2].clear()
+                attached_widgets[3].clear()
+                attached_widgets[4].clear()
+                attached_widgets[5].clear()
                 self.bInputEnabled = False
                 self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
