@@ -57,7 +57,7 @@ class TextBox(Widget):
     def render(self):
         pass
 
-    def update(self):
+    def update(self,dt):
         if not self.bInitialized:
             self.bInitialized = True
             self.rect.topleft = [self.pos.x, self.pos.y]

@@ -22,7 +22,7 @@ class Label(Widget):
         self.update_rendered_content()
         self.rect.topleft = [self.pos.x, self.pos.y]
 
-    def update(self):
+    def update(self,dt):
         pass
 
     def render(self):

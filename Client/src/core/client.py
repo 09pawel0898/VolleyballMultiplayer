@@ -50,8 +50,8 @@ class Client:
         clock = pygame.time.Clock()
         pygame.init()
         while self._running:
-            self._dt = clock.tick(30)
+            self._dt = clock.tick(60)
             self._process_events()
-            self._update(60)
+            self._update(self._dt)
             self._render()
         pygame.quit()

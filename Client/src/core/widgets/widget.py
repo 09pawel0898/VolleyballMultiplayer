@@ -11,5 +11,5 @@ class Widget(ABC,pygame.sprite.Sprite):
         pass
 
     @abstractmethod
-    def update(self):
+    def update(self,dt):
         pass

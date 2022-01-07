@@ -15,9 +15,9 @@ class WidgetManager:
         assert (name in self._widgetsDict)
         return self._widgetsDict[name]
 
-    def update_widgets(self):
+    def update_widgets(self,dt):
         for widget in self._widgetsDict.values():
-            widget.update()
+            widget.update(dt)
 
     def draw_widgets(self, window):
         self._widgetsHolder.draw(window)

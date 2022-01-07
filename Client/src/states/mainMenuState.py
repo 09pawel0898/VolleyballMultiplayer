@@ -1,5 +1,5 @@
 from src.core.states.state import *
-from src.core.widgets.button import Button
+from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
 from src.core.util.utilis import lerp, start_delayed
 
@@ -38,13 +38,23 @@ class MainMenuState(State):
                                                    "res/img/button_signin.png", Texture)
         self.context.texture_manager.load_resource(TextureID.ButtonSignUp,
                                                    "res/img/button_signup.png", Texture)
+        self.context.texture_manager.load_resource(TextureID.ButtonBack,
+                                                   "res/img/button_back.png", Texture)
 
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
         self.widget_manager.init_widget("ButtonSignIn",
-                                        Button(Vec2(356,834),texture_manager.get_resource(TextureID.ButtonSignIn)))
+                                        Button(Vec2(356,834),
+                                        texture_manager.get_resource(TextureID.ButtonSignIn),
+                                        ButtonBehaviour.SlideRight))
         self.widget_manager.init_widget("ButtonSignUp",
-                                        Button(Vec2(475, 906), texture_manager.get_resource(TextureID.ButtonSignUp)))
+                                        Button(Vec2(475, 906),
+                                        texture_manager.get_resource(TextureID.ButtonSignUp),
+                                        ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget("ButtonBack",
+                                        Button(Vec2(300, 300),
+                                        texture_manager.get_resource(TextureID.ButtonBack),
+                                        ButtonBehaviour.Rotate))
         self.widget_manager.init_widget("LoginInputBox", TextBox(Vec2(485,695),"username",200,1,16,
                                                                  "Agency FB",28,"clear", False))
         self.widget_manager.init_widget("PasswordInputBox", TextBox(Vec2(485, 765), "******", 200, 1, 16,
@@ -114,7 +124,7 @@ class MainMenuState(State):
     def _enable_logo_anim(self):
         self.bLogoAnimEnabled = True
 
-    def _update_login_panel_anim(self):
+    def _update_login_panel_anim(self,dt):
         button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
         button_sign_up = self.widget_manager.get_widget("ButtonSignUp")
         login_input_box = self.widget_manager.get_widget("LoginInputBox")
@@ -122,7 +132,7 @@ class MainMenuState(State):
 
         if self.UIAnimState == UIAnimState.LoginPanelSlideIn:
             if self.login_panel.position.y > 25:
-                offset = self.login_panel_init_pos - lerp(self.login_panel.position.y, 15.0, 0.007)
+                offset = self.login_panel_init_pos - lerp(self.login_panel.position.y, 15.0, dt*0.002)
                 self.login_panel.set_position(0, self.login_panel_init_pos - offset)
                 button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
                 button_sign_up.set_position(475, self.temp_initial_widgets_ys[1] - offset)
@@ -136,7 +146,7 @@ class MainMenuState(State):
                 start_delayed(0.6, self._enable_logo_anim)
         elif self.UIAnimState == UIAnimState.LoginPanelSlideOut:
             if self.login_panel.position.y < 500:
-                offset = lerp(self.login_panel.position.y, 585.0, 0.012)
+                offset = lerp(self.login_panel.position.y, 585.0, dt*0.0025)
                 self.login_panel.set_position(0, offset)
                 button_sign_in.set_position(356, self.temp_destination_widgets_ys[0] + offset)
                 button_sign_up.set_position(475, self.temp_destination_widgets_ys[1] + offset)
@@ -148,11 +158,11 @@ class MainMenuState(State):
                 self.bInputEnabled = True
                 self.UIAnimState = UIAnimState.RegisterPanelSlideIn
 
-    def _update_register_panel_anim(self):
+    def _update_register_panel_anim(self,dt):
         #button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
         if self.UIAnimState == UIAnimState.RegisterPanelSlideIn:
             if self.register_panel.position.y > 25:
-                offset = self.register_panel_init_pos - lerp(self.register_panel.position.y, 15.0, 0.007)
+                offset = self.register_panel_init_pos - lerp(self.register_panel.position.y, 15.0, dt*0.002)
                 #button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
                 self.register_panel.set_position(0, self.register_panel_init_pos - offset)
             elif not self.bInputEnabled:
@@ -171,41 +181,41 @@ class MainMenuState(State):
                 self.bInputEnabled = True
                 self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
-    def _update_logo_anim(self):
+    def _update_logo_anim(self, dt):
         if self.bLogoAnimEnabled:
             if self.bLogoAnimGoingDown:
                 if self.logo.position.y < 12.0:
-                    self.logo.set_position(0, lerp(self.logo.position.y, 16.0, 0.007))
+                    self.logo.set_position(0, lerp(self.logo.position.y, 16.0, dt*0.002))
                 else:
                     self.bLogoAnimGoingDown = False
             else:
                 if self.logo.position.y > 1:
-                    self.logo.set_position(0, lerp(self.logo.position.y, -5.0, 0.007))
+                    self.logo.set_position(0, lerp(self.logo.position.y, -5.0, dt*0.002))
                 else:
                     self.bLogoAnimGoingDown = True
 
-    def _update_clouds(self):
+    def _update_clouds(self, dt):
         for clouds in self.cloudsPool:
-            clouds.move(Vec2(0.3, 0))
+            clouds.move(Vec2(0.1*dt, 0))
             if clouds.position.x > self.context.window.get_width():
                 clouds.set_position(-self.context.window.get_width(), 0)
 
-    def _update_ui(self):
+    def _update_ui(self, dt):
         if self.UIAnimState == UIAnimState.LoginPanelVisible or \
                 self.UIAnimState == UIAnimState.RegisterPanelVisible:
           pass
         elif self.UIAnimState == UIAnimState.LoginPanelSlideIn or \
                 self.UIAnimState == UIAnimState.LoginPanelSlideOut:
-            self._update_login_panel_anim()
+            self._update_login_panel_anim(dt)
         elif self.UIAnimState == UIAnimState.RegisterPanelSlideIn or \
                 self.UIAnimState == UIAnimState.RegisterPanelSlideOut:
-            self._update_register_panel_anim()
+            self._update_register_panel_anim(dt)
 
     def _on_update(self, dt: float) -> None:
-        self.widget_manager.update_widgets()
-        self._update_ui()
-        self._update_logo_anim()
-        self._update_clouds()
+        self.widget_manager.update_widgets(dt)
+        self._update_ui(dt)
+        self._update_logo_anim(dt)
+        self._update_clouds(dt)
 
 
 

@@ -19,6 +19,7 @@ class TextureID(Enum):
     ButtonOk = 11
     InfoPanel = 12
     RegisterPanel = 13
+    ButtonBack = 14
 
 class ResourceManager(Generic[ResType]):
     def __init__(self) -> None:
