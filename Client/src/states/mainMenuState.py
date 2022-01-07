@@ -40,9 +40,12 @@ class MainMenuState(State):
                                                    "res/img/button_signup.png", Texture)
         self.context.texture_manager.load_resource(TextureID.ButtonBack,
                                                    "res/img/button_back.png", Texture)
+        self.context.texture_manager.load_resource(TextureID.ButtonRegister,
+                                                   "res/img/button_register.png", Texture)
 
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
+        #login panel buttons
         self.widget_manager.init_widget("ButtonSignIn",
                                         Button(Vec2(356,834),
                                         texture_manager.get_resource(TextureID.ButtonSignIn),
@@ -51,26 +54,42 @@ class MainMenuState(State):
                                         Button(Vec2(475, 906),
                                         texture_manager.get_resource(TextureID.ButtonSignUp),
                                         ButtonBehaviour.SlideRight))
+        #register panel buttons
         self.widget_manager.init_widget("ButtonBack",
-                                        Button(Vec2(300, 300),
+                                        Button(Vec2(376, 916),
                                         texture_manager.get_resource(TextureID.ButtonBack),
-                                        ButtonBehaviour.Rotate))
+                                        ButtonBehaviour.NoBehaviour))
+        self.widget_manager.init_widget("ButtonRegister",
+                                        Button(Vec2(490, 920),
+                                        texture_manager.get_resource(TextureID.ButtonRegister),
+                                        ButtonBehaviour.NoBehaviour))
+
         self.widget_manager.init_widget("LoginInputBox", TextBox(Vec2(485,695),"username",200,1,16,
                                                                  "Agency FB",28,"clear", False))
         self.widget_manager.init_widget("PasswordInputBox", TextBox(Vec2(485, 765), "******", 200, 1, 16,
                                                                     "Agency FB", 28, "clear", False,True))
 
-        self.temp_initial_widgets_ys = [834,906,695,765]
-        self.temp_destination_widgets_ys = [334,406,195,265]
+        self.temp_initial_lp_widgets_ys = [834, 906, 695, 765]
+        self.temp_destination_lp_widgets_ys = [334, 406, 195, 265]
+
+        self.temp_initial_rp_widgets_ys = [916, 920]
+        self.temp_destination_rp_widgets_ys = [416, 420]
 
         self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
         self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
+        self.widget_manager.get_widget("ButtonBack").set_callback(self._back_onclick)
+
+    #button onclicks
 
     def _sign_in_onclick(self):
         print("sign_in_")
 
     def _sign_up_onclick(self):
         self.UIAnimState = UIAnimState.LoginPanelSlideOut
+        self.bInputEnabled = False
+
+    def _back_onclick(self):
+        self.UIAnimState = UIAnimState.RegisterPanelSlideOut
         self.bInputEnabled = False
 
     def _init_state_content(self):
@@ -113,6 +132,8 @@ class MainMenuState(State):
                 if self.bInputEnabled:
                     self.widget_manager.get_widget("ButtonSignIn").check_for_onclick()
                     self.widget_manager.get_widget("ButtonSignUp").check_for_onclick()
+                    self.widget_manager.get_widget("ButtonBack").check_for_onclick()
+
                     if self.widget_manager.get_widget("LoginInputBox").check_for_onclick():
                         self.widget_manager.get_widget("PasswordInputBox").enable_input_to_this(False)
                     elif self.widget_manager.get_widget("PasswordInputBox").check_for_onclick():
@@ -134,10 +155,10 @@ class MainMenuState(State):
             if self.login_panel.position.y > 25:
                 offset = self.login_panel_init_pos - lerp(self.login_panel.position.y, 15.0, dt*0.002)
                 self.login_panel.set_position(0, self.login_panel_init_pos - offset)
-                button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
-                button_sign_up.set_position(475, self.temp_initial_widgets_ys[1] - offset)
-                login_input_box.set_position(485, self.temp_initial_widgets_ys[2] - offset)
-                password_input_box.set_position(485, self.temp_initial_widgets_ys[3] - offset)
+                button_sign_in.set_position(356, self.temp_initial_lp_widgets_ys[0] - offset)
+                button_sign_up.set_position(475, self.temp_initial_lp_widgets_ys[1] - offset)
+                login_input_box.set_position(485, self.temp_initial_lp_widgets_ys[2] - offset)
+                password_input_box.set_position(485, self.temp_initial_lp_widgets_ys[3] - offset)
             elif not self.bInputEnabled:
                 button_sign_in.set_initial_pos(Vec2(356, 356))
                 button_sign_up.set_initial_pos(Vec2(475, 418))
@@ -148,10 +169,10 @@ class MainMenuState(State):
             if self.login_panel.position.y < 500:
                 offset = lerp(self.login_panel.position.y, 585.0, dt*0.0025)
                 self.login_panel.set_position(0, offset)
-                button_sign_in.set_position(356, self.temp_destination_widgets_ys[0] + offset)
-                button_sign_up.set_position(475, self.temp_destination_widgets_ys[1] + offset)
-                login_input_box.set_position(485, self.temp_destination_widgets_ys[2] + offset)
-                password_input_box.set_position(485, self.temp_destination_widgets_ys[3] + offset)
+                button_sign_in.set_position(356, self.temp_destination_lp_widgets_ys[0] + offset)
+                button_sign_up.set_position(475, self.temp_destination_lp_widgets_ys[1] + offset)
+                login_input_box.set_position(485, self.temp_destination_lp_widgets_ys[2] + offset)
+                password_input_box.set_position(485, self.temp_destination_lp_widgets_ys[3] + offset)
             elif not self.bInputEnabled:
                 button_sign_in.set_initial_pos(Vec2(356, 834))
                 button_sign_up.set_initial_pos(Vec2(475, 906))
@@ -159,25 +180,29 @@ class MainMenuState(State):
                 self.UIAnimState = UIAnimState.RegisterPanelSlideIn
 
     def _update_register_panel_anim(self,dt):
-        #button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
+        button_back = self.widget_manager.get_widget("ButtonBack")
+        button_register = self.widget_manager.get_widget("ButtonRegister")
+
         if self.UIAnimState == UIAnimState.RegisterPanelSlideIn:
             if self.register_panel.position.y > 25:
                 offset = self.register_panel_init_pos - lerp(self.register_panel.position.y, 15.0, dt*0.002)
-                #button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
                 self.register_panel.set_position(0, self.register_panel_init_pos - offset)
+                button_back.set_position(376, self.temp_initial_rp_widgets_ys[0] - offset-15.0)
+                button_register.set_position(490, self.temp_initial_rp_widgets_ys[1] - offset-15.0)
             elif not self.bInputEnabled:
-                #button_sign_in.set_initial_pos(Vec2(356, 356))
-                #button_sign_up.set_initial_pos(Vec2(475, 418))
+                button_back.set_initial_pos(Vec2(376, 416))
+                button_register.set_initial_pos(Vec2(490, 420))
                 self.bInputEnabled = True
                 self.UIAnimState = UIAnimState.RegisterPanelVisible
         elif self.UIAnimState == UIAnimState.RegisterPanelSlideOut:
             if self.register_panel.position.y < 500:
-                offset = lerp(self.register_panel.position.y, 585.0, 0.012)
+                offset = lerp(self.register_panel.position.y, 585.0, dt*0.0025)
                 self.register_panel.set_position(0, offset)
-                #button_sign_in.set_position(356, self.temp_destination_widgets_ys[0] + offset)
+                button_back.set_position(376, self.temp_destination_rp_widgets_ys[0] + offset)
+                button_register.set_position(490, self.temp_destination_rp_widgets_ys[1] + offset)
             elif not self.bInputEnabled:
-                #button_sign_in.set_initial_pos(Vec2(356, 834))
-                #button_sign_up.set_initial_pos(Vec2(475, 906))
+                button_back.set_initial_pos(Vec2(376, 916))
+                button_register.set_initial_pos(Vec2(490, 920))
                 self.bInputEnabled = True
                 self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
