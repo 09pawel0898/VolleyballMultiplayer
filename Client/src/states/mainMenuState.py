@@ -1,7 +1,9 @@
 from src.core.states.state import *
 from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
+from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
+from typing import Optional
 
 class UIAnimState(Enum):
     LoginPanelSlideIn = 1
@@ -22,6 +24,7 @@ class MainMenuState(State):
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
         self.UIAnimState = UIAnimState.LoginPanelSlideIn
+        self.beforeMsgAnimState = self.UIAnimState
 
     def _init_resources(self):
         textures_to_init={
@@ -35,7 +38,8 @@ class MainMenuState(State):
             TextureID.ButtonSignUp : "res/img/button_signup.png",
             TextureID.ButtonBack : "res/img/button_back.png",
             TextureID.ButtonRegister : "res/img/button_register.png",
-            TextureID.MessageBox : "res/img/info_panel.png"
+            TextureID.MessageBox : "res/img/info_panel.png",
+            TextureID.ButtonOk : "res/img/button_ok.png"
         }
         for key in textures_to_init:
             self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
@@ -93,17 +97,27 @@ class MainMenuState(State):
         self.msgPanel = Sprite(texture_manager.get_resource(TextureID.MessageBox),
                                position=Vec2(0,-25),
                                origin=Origin.TOP_LEFT)
+        self.msgLabel = Label(Vec2(300,188),"Message",30,font="Agency FB")
+        self.msgButton = Button(Vec2(449,253),texture_manager.get_resource(TextureID.ButtonOk))
+        self.msgButton.set_callback(self._hide_msg_box)
         self.bMsgPanelActive = False
 
-    def _show_msg_box(self,message, button):
-        pass
+
+    def _show_msg_box(self,message):
+        self.beforeMsgAnimState = self.UIAnimState
+        self.UIAnimState = UIAnimState.MessageBoxShowed
+        self.bInputEnabled = True
+        self.bMsgPanelActive = True
+        self.msgLabel.set_text(message)
 
     def _hide_msg_box(self):
-        pass
+        self.UIAnimState = self.beforeMsgAnimState
+        self.bInputEnabled = True
+        self.bMsgPanelActive = False
 
     #button onclick handlers
     def _sign_in_onclick(self):
-        print("sign_in_")
+        self._show_msg_box("Mess",)
 
     def _sign_up_onclick(self):
         self.UIAnimState = UIAnimState.LoginPanelSlideOut
@@ -145,7 +159,11 @@ class MainMenuState(State):
         #widgets
         self.widget_manager.draw_widgets(window)
         #message box
-        self.msgPanel.draw(window)
+        if self.bMsgPanelActive:
+            self.msgPanel.draw(window)
+            window.blit(self.msgLabel.image,self.msgLabel.rect)
+            if self.msgButton is not None:
+                window.blit(self.msgButton.image,self.msgButton.rect)
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         if self.UIAnimState == UIAnimState.LoginPanelVisible:
@@ -188,6 +206,8 @@ class MainMenuState(State):
                         elif self.widget_manager.get_widget("EmailInputBoxRP").check_for_onclick():
                             self.widget_manager.deactivate_textboxes_but_one(
                                 self.widget_manager.get_widget("EmailInputBoxRP"))
+                    elif self.UIAnimState == UIAnimState.MessageBoxShowed:
+                        self.msgButton.check_for_onclick()
 
     def _on_awake(self) -> None:
         pass
@@ -300,7 +320,12 @@ class MainMenuState(State):
             self._update_register_panel_anim(dt)
 
     def _on_update(self, dt: float) -> None:
-        self.widget_manager.update_widgets(dt)
+        # msg box not handled by manager due to Z-buffer bug
+        if self.UIAnimState == UIAnimState.MessageBoxShowed:
+            self.msgButton.update(dt)
+        else:
+            self.widget_manager.update_widgets(dt)
+
         self._update_ui(dt)
         self._update_logo_anim(dt)
         self._update_clouds(dt)
