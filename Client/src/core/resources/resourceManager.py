@@ -15,6 +15,10 @@ class TextureID(Enum):
     Clouds = 7
     ButtonSignIn = 8
     ButtonSignUp = 9
+    ButtonRegister = 10
+    ButtonOk = 11
+    InfoPanel = 12
+    RegisterPanel = 13
 
 class ResourceManager(Generic[ResType]):
     def __init__(self) -> None:

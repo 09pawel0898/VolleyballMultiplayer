@@ -28,6 +28,8 @@ class MainMenuState(State):
                                                    "res/img/background_layer1.png", Texture)
         self.context.texture_manager.load_resource(TextureID.LoginPanel,
                                                    "res/img/login_panel.png", Texture)
+        self.context.texture_manager.load_resource(TextureID.RegisterPanel,
+                                                   "res/img/register_panel.png", Texture)
         self.context.texture_manager.load_resource(TextureID.Logo,
                                                    "res/img/logo.png", Texture)
         self.context.texture_manager.load_resource(TextureID.Clouds,
@@ -49,6 +51,7 @@ class MainMenuState(State):
                                                                     "Agency FB", 28, "clear", False,True))
 
         self.temp_initial_widgets_ys = [834,906,695,765]
+        self.temp_destination_widgets_ys = [334,406,195,265]
 
         self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
         self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
@@ -57,7 +60,8 @@ class MainMenuState(State):
         print("sign_in_")
 
     def _sign_up_onclick(self):
-        print("sign_up_")
+        self.UIAnimState = UIAnimState.LoginPanelSlideOut
+        self.bInputEnabled = False
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -71,9 +75,10 @@ class MainMenuState(State):
         self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT)
         self.login_panel = Sprite(texture_manager.get_resource(
             TextureID.LoginPanel), origin=Origin.TOP_LEFT, position=Vec2(0,500))
-        self.login_panel_init_pos = self.login_panel.position.y
+        self.register_panel = Sprite(texture_manager.get_resource(
+            TextureID.RegisterPanel), origin=Origin.TOP_LEFT, position=Vec2(0, 500))
 
-
+        self.login_panel_init_pos = self.register_panel_init_pos = self.login_panel.position.y
 
     def _on_render(self) -> None:
         #background
@@ -81,8 +86,9 @@ class MainMenuState(State):
         self.cloudsPool[0].draw(self.context.window)
         self.cloudsPool[1].draw(self.context.window)
         self.backgroundLayer1.draw(self.context.window)
-        #login_panel
+        #panels
         self.login_panel.draw(self.context.window)
+        self.register_panel.draw(self.context.window)
         #logo
         self.logo.draw(self.context.window)
         #widgets
@@ -113,19 +119,57 @@ class MainMenuState(State):
         button_sign_up = self.widget_manager.get_widget("ButtonSignUp")
         login_input_box = self.widget_manager.get_widget("LoginInputBox")
         password_input_box = self.widget_manager.get_widget("PasswordInputBox")
-        if self.login_panel.position.y > 25:
-            offset = self.login_panel_init_pos - lerp(self.login_panel.position.y, 15.0, 0.007)
-            self.login_panel.set_position(0, self.login_panel_init_pos - offset)
-            button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
-            button_sign_up.set_position(475, self.temp_initial_widgets_ys[1] - offset)
-            login_input_box.set_position(485, self.temp_initial_widgets_ys[2] - offset)
-            password_input_box.set_position(485, self.temp_initial_widgets_ys[3] - offset)
-        elif not self.bInputEnabled:
-            button_sign_in.set_initial_pos(Vec2(356, 356))
-            button_sign_up.set_initial_pos(Vec2(475, 418))
-            self.bInputEnabled = True
-            self.UIAnimState = UIAnimState.LoginPanelVisible
-            start_delayed(0.6, self._enable_logo_anim)
+
+        if self.UIAnimState == UIAnimState.LoginPanelSlideIn:
+            if self.login_panel.position.y > 25:
+                offset = self.login_panel_init_pos - lerp(self.login_panel.position.y, 15.0, 0.007)
+                self.login_panel.set_position(0, self.login_panel_init_pos - offset)
+                button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
+                button_sign_up.set_position(475, self.temp_initial_widgets_ys[1] - offset)
+                login_input_box.set_position(485, self.temp_initial_widgets_ys[2] - offset)
+                password_input_box.set_position(485, self.temp_initial_widgets_ys[3] - offset)
+            elif not self.bInputEnabled:
+                button_sign_in.set_initial_pos(Vec2(356, 356))
+                button_sign_up.set_initial_pos(Vec2(475, 418))
+                self.bInputEnabled = True
+                self.UIAnimState = UIAnimState.LoginPanelVisible
+                start_delayed(0.6, self._enable_logo_anim)
+        elif self.UIAnimState == UIAnimState.LoginPanelSlideOut:
+            if self.login_panel.position.y < 500:
+                offset = lerp(self.login_panel.position.y, 585.0, 0.012)
+                self.login_panel.set_position(0, offset)
+                button_sign_in.set_position(356, self.temp_destination_widgets_ys[0] + offset)
+                button_sign_up.set_position(475, self.temp_destination_widgets_ys[1] + offset)
+                login_input_box.set_position(485, self.temp_destination_widgets_ys[2] + offset)
+                password_input_box.set_position(485, self.temp_destination_widgets_ys[3] + offset)
+            elif not self.bInputEnabled:
+                button_sign_in.set_initial_pos(Vec2(356, 834))
+                button_sign_up.set_initial_pos(Vec2(475, 906))
+                self.bInputEnabled = True
+                self.UIAnimState = UIAnimState.RegisterPanelSlideIn
+
+    def _update_register_panel_anim(self):
+        #button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
+        if self.UIAnimState == UIAnimState.RegisterPanelSlideIn:
+            if self.register_panel.position.y > 25:
+                offset = self.register_panel_init_pos - lerp(self.register_panel.position.y, 15.0, 0.007)
+                #button_sign_in.set_position(356, self.temp_initial_widgets_ys[0] - offset)
+                self.register_panel.set_position(0, self.register_panel_init_pos - offset)
+            elif not self.bInputEnabled:
+                #button_sign_in.set_initial_pos(Vec2(356, 356))
+                #button_sign_up.set_initial_pos(Vec2(475, 418))
+                self.bInputEnabled = True
+                self.UIAnimState = UIAnimState.RegisterPanelVisible
+        elif self.UIAnimState == UIAnimState.RegisterPanelSlideOut:
+            if self.register_panel.position.y < 500:
+                offset = lerp(self.register_panel.position.y, 585.0, 0.012)
+                self.register_panel.set_position(0, offset)
+                #button_sign_in.set_position(356, self.temp_destination_widgets_ys[0] + offset)
+            elif not self.bInputEnabled:
+                #button_sign_in.set_initial_pos(Vec2(356, 834))
+                #button_sign_up.set_initial_pos(Vec2(475, 906))
+                self.bInputEnabled = True
+                self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
     def _update_logo_anim(self):
         if self.bLogoAnimEnabled:
@@ -147,10 +191,15 @@ class MainMenuState(State):
                 clouds.set_position(-self.context.window.get_width(), 0)
 
     def _update_ui(self):
-        if self.UIAnimState == UIAnimState.LoginPanelVisible or self.UIAnimState == UIAnimState.RegisterPanelVisible:
+        if self.UIAnimState == UIAnimState.LoginPanelVisible or \
+                self.UIAnimState == UIAnimState.RegisterPanelVisible:
           pass
-        elif self.UIAnimState == UIAnimState.LoginPanelSlideIn or self.UIAnimState == UIAnimState.LoginPanelSlideOut:
+        elif self.UIAnimState == UIAnimState.LoginPanelSlideIn or \
+                self.UIAnimState == UIAnimState.LoginPanelSlideOut:
             self._update_login_panel_anim()
+        elif self.UIAnimState == UIAnimState.RegisterPanelSlideIn or \
+                self.UIAnimState == UIAnimState.RegisterPanelSlideOut:
+            self._update_register_panel_anim()
 
     def _on_update(self, dt: float) -> None:
         self.widget_manager.update_widgets()

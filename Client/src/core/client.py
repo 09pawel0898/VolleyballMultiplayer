@@ -14,16 +14,20 @@ class Client:
         self._state_manager = StateManager(self._context)
         self._init_states()
         self._get_ticks_last_frame = 0.0
+        self._dt = 0
 
     def _init_states(self):
         self._state_manager.register_state("MainMenuState",MainMenuState)
         self._state_manager.register_state("GameplayState",GameplayState)
 
-    def _update(self) -> None:
-        curr_time = pygame.time.get_ticks()
-        dt = (curr_time - self._get_ticks_last_frame) / 1000.0
-        self._get_ticks_last_frame = curr_time
-        self._state_manager.on_update(dt)
+    def _update(self,delta_time: Optional[float] = None) -> None:
+        if delta_time is not None:
+            self._state_manager.on_update(delta_time)
+        else:
+            curr_time = pygame.time.get_ticks()
+            dt = (curr_time - self._get_ticks_last_frame) / 1000.0
+            self._get_ticks_last_frame = curr_time
+            self._state_manager.on_update(dt)
 
 
     def _render(self) -> None:
@@ -43,10 +47,11 @@ class Client:
     def run(self) -> None:
         self._running = True
         self._state_manager.push_state("MainMenuState")
-
+        clock = pygame.time.Clock()
         pygame.init()
         while self._running:
+            self._dt = clock.tick(30)
             self._process_events()
-            self._update()
+            self._update(60)
             self._render()
         pygame.quit()
