@@ -1,5 +1,6 @@
 import pygame.sprite
 from src.core.widgets.widget import Widget
+from ..widgets.textbox import TextBox
 
 # unique for each state
 class WidgetManager:
@@ -26,3 +27,8 @@ class WidgetManager:
         if key not in self._widgetsDict:
             self._widgetsDict[key] = widget
 
+    def deactivate_textboxes_but_one(self, textbox: TextBox):
+        for widget in self._widgetsDict.values():
+            if isinstance(widget,TextBox):
+                widget.enable_input_to_this(False)
+        textbox.enable_input_to_this(True)

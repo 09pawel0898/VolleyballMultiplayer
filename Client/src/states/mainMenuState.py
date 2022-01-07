@@ -45,7 +45,8 @@ class MainMenuState(State):
 
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
-        #login panel buttons
+
+        #login panel
         self.widget_manager.init_widget("ButtonSignIn",
                                         Button(Vec2(356,834),
                                         texture_manager.get_resource(TextureID.ButtonSignIn),
@@ -54,33 +55,43 @@ class MainMenuState(State):
                                         Button(Vec2(475, 906),
                                         texture_manager.get_resource(TextureID.ButtonSignUp),
                                         ButtonBehaviour.SlideRight))
-        #register panel buttons
+        self.widget_manager.init_widget("LoginInputBoxLP", TextBox(Vec2(485, 695), "username", 200, 1, 16,
+                                                                   "Agency FB", 28, "clear", False))
+        self.widget_manager.init_widget("PasswordInputBoxLP", TextBox(Vec2(485, 765), "******", 200, 1, 16,
+                                                                      "Agency FB", 28, "clear", False, True))
+        # Y positions for animations, initial(behind the screen) and final
+        self.temp_initial_lp_widgets_ys = [834, 906, 695, 765]
+        self.temp_dest_lp_widgets_ys = [334, 406, 195, 265]
+        # buttons callbacks
+        self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
+        self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
+
+        #register panel
         self.widget_manager.init_widget("ButtonBack",
-                                        Button(Vec2(376, 916),
+                                        Button(Vec2(376, 896),
                                         texture_manager.get_resource(TextureID.ButtonBack),
                                         ButtonBehaviour.NoBehaviour))
         self.widget_manager.init_widget("ButtonRegister",
-                                        Button(Vec2(490, 920),
+                                        Button(Vec2(490, 900),
                                         texture_manager.get_resource(TextureID.ButtonRegister),
                                         ButtonBehaviour.NoBehaviour))
+        self.widget_manager.init_widget("LoginInputBoxRP", TextBox(Vec2(485, 630), "username", 200, 1, 16,
+                                                                   "Agency FB", 25, "clear", False))
+        self.widget_manager.init_widget("PasswordInputBoxRP", TextBox(Vec2(485, 695), "******", 200, 1, 16,
+                                                                      "Agency FB", 25, "clear", False, True))
+        self.widget_manager.init_widget("PasswordConfirmInputBoxRP", TextBox(Vec2(485, 765), "******", 200, 1, 16,
+                                                                      "Agency FB", 25, "clear", False, True))
+        self.widget_manager.init_widget("EmailInputBoxRP", TextBox(Vec2(485, 832), "email", 240, 1,22,
+                                                                   "Agency FB", 25, "clear", False))
 
-        self.widget_manager.init_widget("LoginInputBox", TextBox(Vec2(485,695),"username",200,1,16,
-                                                                 "Agency FB",28,"clear", False))
-        self.widget_manager.init_widget("PasswordInputBox", TextBox(Vec2(485, 765), "******", 200, 1, 16,
-                                                                    "Agency FB", 28, "clear", False,True))
+        # Y positions for animations, initial(behind the screen) and final
+        self.temp_initial_rp_widgets_ys = [896, 900,630,695,765,832]
+        self.temp_dest_rp_widgets_ys = [396, 400, 130, 195, 265, 332]
 
-        self.temp_initial_lp_widgets_ys = [834, 906, 695, 765]
-        self.temp_destination_lp_widgets_ys = [334, 406, 195, 265]
-
-        self.temp_initial_rp_widgets_ys = [916, 920]
-        self.temp_destination_rp_widgets_ys = [416, 420]
-
-        self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
-        self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
+        # buttons callbacks
         self.widget_manager.get_widget("ButtonBack").set_callback(self._back_onclick)
 
-    #button onclicks
-
+    #button onclick handlers
     def _sign_in_onclick(self):
         print("sign_in_")
 
@@ -124,20 +135,46 @@ class MainMenuState(State):
         self.widget_manager.draw_widgets(self.context.window)
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
-        self.widget_manager.get_widget("LoginInputBox").handle_input_events(events)
-        self.widget_manager.get_widget("PasswordInputBox").handle_input_events(events)
+        if self.UIAnimState == UIAnimState.LoginPanelVisible:
+            self.widget_manager.get_widget("LoginInputBoxLP").handle_input_events(events)
+            self.widget_manager.get_widget("PasswordInputBoxLP").handle_input_events(events)
+        elif self.UIAnimState == UIAnimState.RegisterPanelVisible:
+            self.widget_manager.get_widget("LoginInputBoxRP").handle_input_events(events)
+            self.widget_manager.get_widget("PasswordInputBoxRP").handle_input_events(events)
+            self.widget_manager.get_widget("PasswordConfirmInputBoxRP").handle_input_events(events)
+            self.widget_manager.get_widget("EmailInputBoxRP").handle_input_events(events)
 
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.bInputEnabled:
-                    self.widget_manager.get_widget("ButtonSignIn").check_for_onclick()
-                    self.widget_manager.get_widget("ButtonSignUp").check_for_onclick()
-                    self.widget_manager.get_widget("ButtonBack").check_for_onclick()
+                    # login panel is visible
+                    if self.UIAnimState == UIAnimState.LoginPanelVisible:
+                        self.widget_manager.get_widget("ButtonSignIn").check_for_onclick()
+                        self.widget_manager.get_widget("ButtonSignUp").check_for_onclick()
 
-                    if self.widget_manager.get_widget("LoginInputBox").check_for_onclick():
-                        self.widget_manager.get_widget("PasswordInputBox").enable_input_to_this(False)
-                    elif self.widget_manager.get_widget("PasswordInputBox").check_for_onclick():
-                        self.widget_manager.get_widget("LoginInputBox").enable_input_to_this(False)
+                        if self.widget_manager.get_widget("LoginInputBoxLP").check_for_onclick():
+                            self.widget_manager.deactivate_textboxes_but_one(
+                                self.widget_manager.get_widget("LoginInputBoxLP"))
+                        elif self.widget_manager.get_widget("PasswordInputBoxLP").check_for_onclick():
+                            self.widget_manager.deactivate_textboxes_but_one(
+                                self.widget_manager.get_widget("PasswordInputBoxLP"))
+
+                    #register panel is visible
+                    elif self.UIAnimState == UIAnimState.RegisterPanelVisible:
+                        self.widget_manager.get_widget("ButtonBack").check_for_onclick()
+
+                        if self.widget_manager.get_widget("LoginInputBoxRP").check_for_onclick():
+                            self.widget_manager.deactivate_textboxes_but_one(
+                                self.widget_manager.get_widget("LoginInputBoxRP"))
+                        elif self.widget_manager.get_widget("PasswordInputBoxRP").check_for_onclick():
+                            self.widget_manager.deactivate_textboxes_but_one(
+                                self.widget_manager.get_widget("PasswordInputBoxRP"))
+                        elif self.widget_manager.get_widget("PasswordConfirmInputBoxRP").check_for_onclick():
+                            self.widget_manager.deactivate_textboxes_but_one(
+                                self.widget_manager.get_widget("PasswordConfirmInputBoxRP"))
+                        elif self.widget_manager.get_widget("EmailInputBoxRP").check_for_onclick():
+                            self.widget_manager.deactivate_textboxes_but_one(
+                                self.widget_manager.get_widget("EmailInputBoxRP"))
 
     def _on_awake(self) -> None:
         pass
@@ -146,22 +183,25 @@ class MainMenuState(State):
         self.bLogoAnimEnabled = True
 
     def _update_login_panel_anim(self,dt):
-        button_sign_in = self.widget_manager.get_widget("ButtonSignIn")
-        button_sign_up = self.widget_manager.get_widget("ButtonSignUp")
-        login_input_box = self.widget_manager.get_widget("LoginInputBox")
-        password_input_box = self.widget_manager.get_widget("PasswordInputBox")
+        attached_widgets = [
+            self.widget_manager.get_widget("ButtonSignIn"),
+            self.widget_manager.get_widget("ButtonSignUp"),
+            self.widget_manager.get_widget("LoginInputBoxLP"),
+            self.widget_manager.get_widget("PasswordInputBoxLP")
+        ]
 
         if self.UIAnimState == UIAnimState.LoginPanelSlideIn:
             if self.login_panel.position.y > 25:
                 offset = self.login_panel_init_pos - lerp(self.login_panel.position.y, 15.0, dt*0.002)
                 self.login_panel.set_position(0, self.login_panel_init_pos - offset)
-                button_sign_in.set_position(356, self.temp_initial_lp_widgets_ys[0] - offset)
-                button_sign_up.set_position(475, self.temp_initial_lp_widgets_ys[1] - offset)
-                login_input_box.set_position(485, self.temp_initial_lp_widgets_ys[2] - offset)
-                password_input_box.set_position(485, self.temp_initial_lp_widgets_ys[3] - offset)
+                i = 0
+                for widget in attached_widgets:
+                    widget.set_position(widget.pos.x, self.temp_initial_lp_widgets_ys[i] - offset)
+                    i += 1
             elif not self.bInputEnabled:
-                button_sign_in.set_initial_pos(Vec2(356, 356))
-                button_sign_up.set_initial_pos(Vec2(475, 418))
+                #setting initial pos for buttons
+                attached_widgets[0].set_initial_pos(Vec2(attached_widgets[0].pos.x, 356))
+                attached_widgets[1].set_initial_pos(Vec2(attached_widgets[1].pos.x, 418))
                 self.bInputEnabled = True
                 self.UIAnimState = UIAnimState.LoginPanelVisible
                 start_delayed(0.6, self._enable_logo_anim)
@@ -169,41 +209,51 @@ class MainMenuState(State):
             if self.login_panel.position.y < 500:
                 offset = lerp(self.login_panel.position.y, 585.0, dt*0.0025)
                 self.login_panel.set_position(0, offset)
-                button_sign_in.set_position(356, self.temp_destination_lp_widgets_ys[0] + offset)
-                button_sign_up.set_position(475, self.temp_destination_lp_widgets_ys[1] + offset)
-                login_input_box.set_position(485, self.temp_destination_lp_widgets_ys[2] + offset)
-                password_input_box.set_position(485, self.temp_destination_lp_widgets_ys[3] + offset)
+                i = 0
+                for widget in attached_widgets:
+                    widget.set_position(widget.pos.x, self.temp_dest_lp_widgets_ys[i] + offset)
+                    i+=1
             elif not self.bInputEnabled:
-                button_sign_in.set_initial_pos(Vec2(356, 834))
-                button_sign_up.set_initial_pos(Vec2(475, 906))
-                self.bInputEnabled = True
+                attached_widgets[0].set_initial_pos(Vec2(attached_widgets[0].pos.x, 834))
+                attached_widgets[1].set_initial_pos(Vec2(attached_widgets[1].pos.x, 906))
+                self.bInputEnabled = False
                 self.UIAnimState = UIAnimState.RegisterPanelSlideIn
 
     def _update_register_panel_anim(self,dt):
-        button_back = self.widget_manager.get_widget("ButtonBack")
-        button_register = self.widget_manager.get_widget("ButtonRegister")
+        attached_widgets=[
+            self.widget_manager.get_widget("ButtonBack"),
+            self.widget_manager.get_widget("ButtonRegister"),
+            self.widget_manager.get_widget("LoginInputBoxRP"),
+            self.widget_manager.get_widget("PasswordInputBoxRP"),
+            self.widget_manager.get_widget("PasswordConfirmInputBoxRP"),
+            self.widget_manager.get_widget("EmailInputBoxRP")
+        ]
 
         if self.UIAnimState == UIAnimState.RegisterPanelSlideIn:
             if self.register_panel.position.y > 25:
                 offset = self.register_panel_init_pos - lerp(self.register_panel.position.y, 15.0, dt*0.002)
                 self.register_panel.set_position(0, self.register_panel_init_pos - offset)
-                button_back.set_position(376, self.temp_initial_rp_widgets_ys[0] - offset-15.0)
-                button_register.set_position(490, self.temp_initial_rp_widgets_ys[1] - offset-15.0)
+                i = 0
+                for widget in attached_widgets:
+                    widget.set_position(widget.pos.x, self.temp_initial_rp_widgets_ys[i] - offset)
+                    i += 1
             elif not self.bInputEnabled:
-                button_back.set_initial_pos(Vec2(376, 416))
-                button_register.set_initial_pos(Vec2(490, 420))
+                attached_widgets[0].set_initial_pos(Vec2(376, 416))
+                attached_widgets[1].set_initial_pos(Vec2(490, 420))
                 self.bInputEnabled = True
                 self.UIAnimState = UIAnimState.RegisterPanelVisible
         elif self.UIAnimState == UIAnimState.RegisterPanelSlideOut:
             if self.register_panel.position.y < 500:
                 offset = lerp(self.register_panel.position.y, 585.0, dt*0.0025)
                 self.register_panel.set_position(0, offset)
-                button_back.set_position(376, self.temp_destination_rp_widgets_ys[0] + offset)
-                button_register.set_position(490, self.temp_destination_rp_widgets_ys[1] + offset)
+                i = 0
+                for widget in attached_widgets:
+                    widget.set_position(widget.pos.x, self.temp_dest_rp_widgets_ys[i] + offset)
+                    i += 1
             elif not self.bInputEnabled:
-                button_back.set_initial_pos(Vec2(376, 916))
-                button_register.set_initial_pos(Vec2(490, 920))
-                self.bInputEnabled = True
+                attached_widgets[0].set_initial_pos(Vec2(376, 916))
+                attached_widgets[1].set_initial_pos(Vec2(490, 920))
+                self.bInputEnabled = False
                 self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
     def _update_logo_anim(self, dt):

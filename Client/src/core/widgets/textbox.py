@@ -76,6 +76,10 @@ class TextBox(Widget):
 
     def enable_input_to_this(self, enabled):
         self.bInputEnabled = enabled
+        if not enabled and len(self.textDisplayed) == 0:
+            self._refresh_rendered_enitities(True)
+        else:
+            self._refresh_rendered_enitities(False)
 
     def _cursor_in_bounds(self, mouse_pos):
         if self.rect.left <= mouse_pos[0] <= self.rect.right and self.rect.top <= mouse_pos[1] <= self.rect.bottom:
@@ -93,7 +97,6 @@ class TextBox(Widget):
                         self.enable_input_to_this(False)
                         if len(self.textDisplayed) == 0:
                             self._refresh_rendered_enitities(True)
-                        print("InputDisabled")
                     else:
                         self._try_add_character(event)
 
