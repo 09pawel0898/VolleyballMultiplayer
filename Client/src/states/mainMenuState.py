@@ -10,38 +10,35 @@ class UIAnimState(Enum):
     RegisterPanelSlideIn = 4
     RegisterPanelSlideOut = 5
     RegisterPanelVisible = 6
+    MessageBoxShowed = 7
 
 class MainMenuState(State):
     def __init__(self, context, state_manager):
         super().__init__(context,state_manager)
         self._init_state_content()
         self._init_widgets()
+        self._init_msg_box()
         self.bInputEnabled = False
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
         self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
     def _init_resources(self):
-        self.context.texture_manager.load_resource(TextureID.BackgroundLayer0,
-                                                   "res/img/background_layer0.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.BackgroundLayer1,
-                                                   "res/img/background_layer1.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.LoginPanel,
-                                                   "res/img/login_panel.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.RegisterPanel,
-                                                   "res/img/register_panel.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.Logo,
-                                                   "res/img/logo.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.Clouds,
-                                                   "res/img/clouds.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.ButtonSignIn,
-                                                   "res/img/button_signin.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.ButtonSignUp,
-                                                   "res/img/button_signup.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.ButtonBack,
-                                                   "res/img/button_back.png", Texture)
-        self.context.texture_manager.load_resource(TextureID.ButtonRegister,
-                                                   "res/img/button_register.png", Texture)
+        textures_to_init={
+            TextureID.BackgroundLayer0 : "res/img/background_layer0.png",
+            TextureID.BackgroundLayer1 : "res/img/background_layer1.png",
+            TextureID.LoginPanel : "res/img/login_panel.png",
+            TextureID.RegisterPanel : "res/img/register_panel.png",
+            TextureID.Logo : "res/img/logo.png",
+            TextureID.Clouds : "res/img/clouds.png",
+            TextureID.ButtonSignIn : "res/img/button_signin.png",
+            TextureID.ButtonSignUp : "res/img/button_signup.png",
+            TextureID.ButtonBack : "res/img/button_back.png",
+            TextureID.ButtonRegister : "res/img/button_register.png",
+            TextureID.MessageBox : "res/img/info_panel.png"
+        }
+        for key in textures_to_init:
+            self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
 
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -91,6 +88,19 @@ class MainMenuState(State):
         # buttons callbacks
         self.widget_manager.get_widget("ButtonBack").set_callback(self._back_onclick)
 
+    def _init_msg_box(self):
+        texture_manager = self.state_manager.context.texture_manager
+        self.msgPanel = Sprite(texture_manager.get_resource(TextureID.MessageBox),
+                               position=Vec2(0,-25),
+                               origin=Origin.TOP_LEFT)
+        self.bMsgPanelActive = False
+
+    def _show_msg_box(self,message, button):
+        pass
+
+    def _hide_msg_box(self):
+        pass
+
     #button onclick handlers
     def _sign_in_onclick(self):
         print("sign_in_")
@@ -121,18 +131,21 @@ class MainMenuState(State):
         self.login_panel_init_pos = self.register_panel_init_pos = self.login_panel.position.y
 
     def _on_render(self) -> None:
+        window = self.context.window
         #background
-        self.backgroundLayer0.draw(self.context.window)
-        self.cloudsPool[0].draw(self.context.window)
-        self.cloudsPool[1].draw(self.context.window)
-        self.backgroundLayer1.draw(self.context.window)
+        self.backgroundLayer0.draw(window)
+        self.cloudsPool[0].draw(window)
+        self.cloudsPool[1].draw(window)
+        self.backgroundLayer1.draw(window)
         #panels
-        self.login_panel.draw(self.context.window)
-        self.register_panel.draw(self.context.window)
+        self.login_panel.draw(window)
+        self.register_panel.draw(window)
         #logo
-        self.logo.draw(self.context.window)
+        self.logo.draw(window)
         #widgets
-        self.widget_manager.draw_widgets(self.context.window)
+        self.widget_manager.draw_widgets(window)
+        #message box
+        self.msgPanel.draw(window)
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         if self.UIAnimState == UIAnimState.LoginPanelVisible:

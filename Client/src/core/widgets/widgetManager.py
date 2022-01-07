@@ -12,6 +12,11 @@ class WidgetManager:
         self._widgetsHolder.add(widget)
         self._insert_widget(name,widget)
 
+    def remove_widget(self, name: str):
+        widget_to_remove = self._widgetsDict[name]
+        self._widgetsHolder.remove(widget_to_remove)
+        self._widgetsDict.pop(name)
+
     def get_widget(self, name: str) -> Widget:
         assert (name in self._widgetsDict)
         return self._widgetsDict[name]
