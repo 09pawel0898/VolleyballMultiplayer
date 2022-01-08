@@ -3,7 +3,7 @@ from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
-from typing import Optional
+from src.core.util.localauth import LocalAuth
 
 class UIAnimState(Enum):
     LoginPanelSlideIn = 1
@@ -56,9 +56,11 @@ class MainMenuState(State):
                                         Button(Vec2(475, 906),
                                         texture_manager.get_resource(TextureID.ButtonSignUp),
                                         ButtonBehaviour.SlideRight))
-        self.widget_manager.init_widget("LoginInputBoxLP", TextBox(Vec2(485, 695), "username", 240, 1, 16,
+        self.widget_manager.init_widget("LoginInputBoxLP", TextBox(Vec2(485, 695), "username", 240, 1,
+                                                                   LocalAuth.MAX_LOGIN_LEN,
                                                                    "Agency FB", 28, "clear", False))
-        self.widget_manager.init_widget("PasswordInputBoxLP", TextBox(Vec2(485, 765), "******", 240, 1, 16,
+        self.widget_manager.init_widget("PasswordInputBoxLP", TextBox(Vec2(485, 765), "******", 240, 1,
+                                                                      LocalAuth.MAX_PASSWD_LED,
                                                                       "Agency FB", 28, "clear", False, True))
         # Y positions for animations, initial(behind the screen) and final
         self.temp_initial_lp_widgets_ys = [834, 906, 695, 765]
@@ -76,14 +78,17 @@ class MainMenuState(State):
                                         Button(Vec2(490, 900),
                                         texture_manager.get_resource(TextureID.ButtonRegister),
                                         ButtonBehaviour.NoBehaviour))
-        self.widget_manager.init_widget("LoginInputBoxRP", TextBox(Vec2(485, 630), "username", 240, 1, 16,
+        self.widget_manager.init_widget("LoginInputBoxRP", TextBox(Vec2(485, 630), "username", 240, 1,
+                                                                   LocalAuth.MAX_LOGIN_LEN,
                                                                    "Agency FB", 25, "clear", False))
-        self.widget_manager.init_widget("PasswordInputBoxRP", TextBox(Vec2(485, 695), "******", 240, 1, 16,
+        self.widget_manager.init_widget("PasswordInputBoxRP", TextBox(Vec2(485, 695), "******", 240, 1,
+                                                                      LocalAuth.MAX_PASSWD_LED,
                                                                       "Agency FB", 25, "clear", False, True))
-        self.widget_manager.init_widget("PasswordConfirmInputBoxRP", TextBox(Vec2(485, 765), "******", 240, 1, 16,
-                                                                      "Agency FB", 25, "clear", False, True))
-        self.widget_manager.init_widget("EmailInputBoxRP", TextBox(Vec2(485, 832), "email", 240, 1,22,
-                                                                   "Agency FB", 25, "clear", False))
+        self.widget_manager.init_widget("PasswordConfirmInputBoxRP", TextBox(Vec2(485, 765), "******", 240, 1,
+                                                                     LocalAuth.MAX_PASSWD_LED,
+                                                                     "Agency FB", 25, "clear", False, True))
+        self.widget_manager.init_widget("EmailInputBoxRP", TextBox(Vec2(485, 832), "email", 240, 1,
+                                        LocalAuth.MAX_EMAIL_LEN,"Agency FB", 25, "clear", False))
 
         # Y positions for animations, initial(behind the screen) and final
         self.temp_initial_rp_widgets_ys = [896, 900,630,695,765,832]
@@ -91,6 +96,7 @@ class MainMenuState(State):
 
         # buttons callbacks
         self.widget_manager.get_widget("ButtonBack").set_callback(self._back_onclick)
+        self.widget_manager.get_widget("ButtonRegister").set_callback(self._register_onclick)
 
     def _init_msg_box(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -127,6 +133,16 @@ class MainMenuState(State):
     def _back_onclick(self):
         self.UIAnimState = UIAnimState.RegisterPanelSlideOut
         self.bInputEnabled = False
+
+    def _register_onclick(self):
+        widget_manager = self.widget_manager
+        validation_status = LocalAuth.validate_signup_form(
+            widget_manager.get_widget("LoginInputBoxRP").text,
+            widget_manager.get_widget("PasswordInputBoxRP").text,
+            widget_manager.get_widget("PasswordConfirmInputBoxRP").text,
+            widget_manager.get_widget("EmailInputBoxRP").text,
+        )
+        print(validation_status)
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -196,6 +212,7 @@ class MainMenuState(State):
                     #register panel is visible
                     elif self.UIAnimState == UIAnimState.RegisterPanelVisible:
                         self.widget_manager.get_widget("ButtonBack").check_for_onclick()
+                        self.widget_manager.get_widget("ButtonRegister").check_for_onclick()
 
                         if self.widget_manager.get_widget("LoginInputBoxRP").check_for_onclick():
                             self.widget_manager.deactivate_textboxes_but_one(

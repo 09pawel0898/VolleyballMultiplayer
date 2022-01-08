@@ -71,8 +71,7 @@ class TextBox(Widget):
         if self.bCovered:
             if not self.bInputEnabled:
                 self.enable_input(True)
-                return True
-        return False
+            return True
 
     def enable_input(self, enabled):
         self.bInputEnabled = enabled
@@ -143,6 +142,7 @@ class TextBox(Widget):
             keys = pygame.key.get_pressed()
             if keys[pygame.K_BACKSPACE]:
                 self.textDisplayed = self.textDisplayed[0:len(self.textDisplayed) - 1]
+                self.text = self.text[0:len(self.text) - 1]
                 pygame.event.clear()
         self._refresh_rendered_enitities(False)
 
