@@ -23,6 +23,14 @@ class LocalAuth:
 
     @staticmethod
     def validate_signup_form(username: str, password: str, confirmed: str, email: str) -> AuthStatus:
+        #if username == "":
+        #    return AuthStatus.EmptyLogin
+        #elif password == "":
+        #    return AuthStatus.EmptyPassword
+        #elif confirmed == "":
+        #    return AuthStatus.EmptyConfirmed
+        #elif email == "":
+        #    return AuthStatus.EmptyEmail
         if not LocalAuth._test_login(username):
             return AuthStatus.BadUsername
         elif not LocalAuth._test_password(password):

@@ -3,7 +3,7 @@ from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
-from src.core.util.localauth import LocalAuth
+from src.core.util.localauth import LocalAuth, AuthStatus
 
 class UIAnimState(Enum):
     LoginPanelSlideIn = 1
@@ -142,23 +142,33 @@ class MainMenuState(State):
             widget_manager.get_widget("PasswordConfirmInputBoxRP").text,
             widget_manager.get_widget("EmailInputBoxRP").text,
         )
-        print(validation_status)
+        match validation_status:
+            case AuthStatus.BadUsername:        self._show_msg_box("Bad username.")
+            case AuthStatus.PasswordTooWeak:    self._show_msg_box("Your password is too weak.")
+            case AuthStatus.PasswordsNotMatch:  self._show_msg_box("Passwords do not match.")
+            case AuthStatus.EmailNotValid:      self._show_msg_box("Invalid email.")
+            case AuthStatus.Valid:
+                pass
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager
+
+        #background
         self.backgroundLayer0 = Sprite(texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT)
         self.backgroundLayer1 = Sprite(texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT)
+        #clouds
         self.cloudsPool : [Sprite] = []
         self.cloudsPool.append(Sprite(texture_manager.get_resource(
             TextureID.Clouds), origin=Origin.TOP_LEFT, position=Vec2(-self.context.window.get_width(), 0)))
         self.cloudsPool.append(Sprite(texture_manager.get_resource(
             TextureID.Clouds), origin=Origin.TOP_LEFT, position=Vec2(-self.context.window.get_width() * 2, 0)))
+        #logo
         self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT)
+        #panels
         self.login_panel = Sprite(texture_manager.get_resource(
             TextureID.LoginPanel), origin=Origin.TOP_LEFT, position=Vec2(0,500))
         self.register_panel = Sprite(texture_manager.get_resource(
             TextureID.RegisterPanel), origin=Origin.TOP_LEFT, position=Vec2(0, 500))
-
         self.login_panel_init_pos = self.register_panel_init_pos = self.login_panel.position.y
 
     def _on_render(self) -> None:
