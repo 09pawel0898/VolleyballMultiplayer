@@ -1,7 +1,5 @@
 from typing import TypeVar, Generic
 from enum import Enum
-from src.core.resources.texture import Texture
-import pygame
 
 ResType = TypeVar('ResType')
 

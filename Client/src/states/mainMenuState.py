@@ -6,8 +6,6 @@ from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
 
-from src.networking.serverAPI.serverapi import ServerAPI, ResponseStatus, User
-import asyncio
 
 class UIAnimState(Enum):
     LoginPanelSlideIn = 1
@@ -383,6 +381,6 @@ class MainMenuState(State):
 
         response = ApiReqThread.try_get_response()
         if response is not None:
-            print(response)
+            pass
 
 
