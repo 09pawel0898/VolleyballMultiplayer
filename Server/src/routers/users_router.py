@@ -60,3 +60,7 @@ def create_user(user: schemas.UserCreate, response: Response, db: Session = Depe
     else:
         response.status_code = status.HTTP_226_IM_USED
         return {"data" : f"username {user.username} is already in use"}
+
+@router.get("/all/")
+def get_all(db: Session = Depends(get_db)):
+    return db.query(models.Users).all()

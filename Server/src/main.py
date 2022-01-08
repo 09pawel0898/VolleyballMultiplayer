@@ -7,6 +7,7 @@ app = FastAPI()
 
 app.include_router(users_router.router)
 
-@app.post("/temp/")
-def temp(val: int):
-    return {"s":val}
+@app.get("/temp/")
+def temp():
+    return {"temp":"temp"}
+

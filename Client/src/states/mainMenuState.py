@@ -4,7 +4,9 @@ from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
-from src.networking.serverAPI.user import ServerAPI, SignUpStatus, User
+from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
+
+from src.networking.serverAPI.serverapi import ServerAPI, ResponseStatus, User
 import asyncio
 
 class UIAnimState(Enum):
@@ -154,9 +156,7 @@ class MainMenuState(State):
             case AuthStatus.PasswordsNotMatch:  self._show_msg_box("Passwords do not match.")
             case AuthStatus.EmailNotValid:      self._show_msg_box("Invalid email.")
             case AuthStatus.Valid:
-                loop = asyncio.get_event_loop()
-                coroutine = ServerAPI.try_register_user(User(username=login,password=password))
-                loop.run_until_complete(coroutine)
+                ApiReqThread.new_request(ApiRequest(PendingRequest.POST_RegisterUser, data = (login, password)))
 
                 #if status == SignUpStatus.SignedUp:
                 #    self._show_msg_box("User registered successfully!")
@@ -381,5 +381,8 @@ class MainMenuState(State):
         self._update_logo_anim(dt)
         self._update_clouds(dt)
 
+        response = ApiReqThread.try_get_response()
+        if response is not None:
+            print(response)
 
 
