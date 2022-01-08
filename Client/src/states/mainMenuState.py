@@ -4,6 +4,8 @@ from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
+from src.networking.serverAPI.user import ServerAPI, SignUpStatus, User
+import asyncio
 
 class UIAnimState(Enum):
     LoginPanelSlideIn = 1
@@ -48,23 +50,23 @@ class MainMenuState(State):
         texture_manager = self.state_manager.context.texture_manager
 
         #login panel
-        self.widget_manager.init_widget("ButtonSignIn",
-                                        Button(Vec2(356,834),
-                                        texture_manager.get_resource(TextureID.ButtonSignIn),
-                                        ButtonBehaviour.SlideRight))
-        self.widget_manager.init_widget("ButtonSignUp",
-                                        Button(Vec2(475, 906),
-                                        texture_manager.get_resource(TextureID.ButtonSignUp),
-                                        ButtonBehaviour.SlideRight))
-        self.widget_manager.init_widget("LoginInputBoxLP", TextBox(Vec2(485, 695), "username", 240, 1,
-                                                                   LocalAuth.MAX_LOGIN_LEN,
-                                                                   "Agency FB", 28, "clear", False))
-        self.widget_manager.init_widget("PasswordInputBoxLP", TextBox(Vec2(485, 765), "******", 240, 1,
-                                                                      LocalAuth.MAX_PASSWD_LED,
-                                                                      "Agency FB", 28, "clear", False, True))
+        self.widget_manager.init_widget(
+            "ButtonSignIn",
+            Button(Vec2(356,834),texture_manager.get_resource(TextureID.ButtonSignIn),ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget(
+            "ButtonSignUp",
+            Button(Vec2(475, 906),texture_manager.get_resource(TextureID.ButtonSignUp),ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget(
+            "LoginInputBoxLP",
+            TextBox(Vec2(485, 695), "username", 240, 1,LocalAuth.MAX_LOGIN_LEN,"Agency FB", 28, "clear", False))
+        self.widget_manager.init_widget(
+            "PasswordInputBoxLP",
+            TextBox(Vec2(485, 765), "******", 240, 1,LocalAuth.MAX_PASSWD_LED,"Agency FB", 28, "clear", False, True))
+
         # Y positions for animations, initial(behind the screen) and final
         self.temp_initial_lp_widgets_ys = [834, 906, 695, 765]
         self.temp_dest_lp_widgets_ys = [334, 406, 195, 265]
+
         # buttons callbacks
         self.widget_manager.get_widget("ButtonSignIn").set_callback(self._sign_in_onclick)
         self.widget_manager.get_widget("ButtonSignUp").set_callback(self._sign_up_onclick)
@@ -78,17 +80,18 @@ class MainMenuState(State):
                                         Button(Vec2(490, 900),
                                         texture_manager.get_resource(TextureID.ButtonRegister),
                                         ButtonBehaviour.NoBehaviour))
-        self.widget_manager.init_widget("LoginInputBoxRP", TextBox(Vec2(485, 630), "username", 240, 1,
-                                                                   LocalAuth.MAX_LOGIN_LEN,
-                                                                   "Agency FB", 25, "clear", False))
-        self.widget_manager.init_widget("PasswordInputBoxRP", TextBox(Vec2(485, 695), "******", 240, 1,
-                                                                      LocalAuth.MAX_PASSWD_LED,
-                                                                      "Agency FB", 25, "clear", False, True))
-        self.widget_manager.init_widget("PasswordConfirmInputBoxRP", TextBox(Vec2(485, 765), "******", 240, 1,
-                                                                     LocalAuth.MAX_PASSWD_LED,
-                                                                     "Agency FB", 25, "clear", False, True))
-        self.widget_manager.init_widget("EmailInputBoxRP", TextBox(Vec2(485, 832), "email", 240, 1,
-                                        LocalAuth.MAX_EMAIL_LEN,"Agency FB", 25, "clear", False))
+        self.widget_manager.init_widget(
+            "LoginInputBoxRP",
+            TextBox(Vec2(485, 630), "username", 240, 1, LocalAuth.MAX_LOGIN_LEN,"Agency FB", 25, "clear", False))
+        self.widget_manager.init_widget(
+            "PasswordInputBoxRP",
+            TextBox(Vec2(485, 695), "******", 240, 1,LocalAuth.MAX_PASSWD_LED,"Agency FB", 25, "clear", False, True))
+        self.widget_manager.init_widget(
+            "PasswordConfirmInputBoxRP",
+            TextBox(Vec2(485, 765), "******", 240, 1,LocalAuth.MAX_PASSWD_LED,"Agency FB", 25, "clear", False, True))
+        self.widget_manager.init_widget(
+            "EmailInputBoxRP",
+            TextBox(Vec2(485, 832), "email", 240, 1,LocalAuth.MAX_EMAIL_LEN,"Agency FB", 25, "clear", False))
 
         # Y positions for animations, initial(behind the screen) and final
         self.temp_initial_rp_widgets_ys = [896, 900,630,695,765,832]
@@ -136,11 +139,14 @@ class MainMenuState(State):
 
     def _register_onclick(self):
         widget_manager = self.widget_manager
+
+        login = widget_manager.get_widget("LoginInputBoxRP").text
+        password = widget_manager.get_widget("PasswordInputBoxRP").text
+        confirmed = widget_manager.get_widget("PasswordConfirmInputBoxRP").text
+        email = widget_manager.get_widget("EmailInputBoxRP").text
+
         validation_status = LocalAuth.validate_signup_form(
-            widget_manager.get_widget("LoginInputBoxRP").text,
-            widget_manager.get_widget("PasswordInputBoxRP").text,
-            widget_manager.get_widget("PasswordConfirmInputBoxRP").text,
-            widget_manager.get_widget("EmailInputBoxRP").text,
+            login, password, confirmed, email
         )
         match validation_status:
             case AuthStatus.BadUsername:        self._show_msg_box("Bad username.")
@@ -148,7 +154,14 @@ class MainMenuState(State):
             case AuthStatus.PasswordsNotMatch:  self._show_msg_box("Passwords do not match.")
             case AuthStatus.EmailNotValid:      self._show_msg_box("Invalid email.")
             case AuthStatus.Valid:
-                pass
+                loop = asyncio.get_event_loop()
+                coroutine = ServerAPI.try_register_user(User(username=login,password=password))
+                loop.run_until_complete(coroutine)
+
+                #if status == SignUpStatus.SignedUp:
+                #    self._show_msg_box("User registered successfully!")
+                #elif status == SignUpStatus.UsernameTaken:
+                #    self._show_msg_box("User already exist.")
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager

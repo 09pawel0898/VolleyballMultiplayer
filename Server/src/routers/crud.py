@@ -20,14 +20,17 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def get_user(db,username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+    return db.query(models.Users).filter(models.Users.username == username).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    db_user = models.User(username=user.username, hashed_password=get_password_hash(user.password))
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    db_user = models.Users(username=user.username, hashed_password=get_password_hash(user.password))
+    existing_user = db.query(models.Users).filter(models.Users.username == user.username).first()
+    if not existing_user:
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    return None
 
 def authenticate_user(db, username: str, password: str):
     user = get_user(db, username)

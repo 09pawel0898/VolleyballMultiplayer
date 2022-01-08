@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from . import models, crud, schemas
@@ -49,9 +49,14 @@ def login_for_access_token(db: Session = Depends(get_db),form_data: OAuth2Passwo
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/users/me/")
-def read_users_me(current_user: models.User = Depends(get_current_user)):
+def read_users_me(current_user: models.Users = Depends(get_current_user)):
     return current_user
 
-@router.post("/users/", status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return crud.create_user(db=db, user=user)
+@router.post("/user-new/", status_code=status.HTTP_201_CREATED)
+def create_user(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
+    result = crud.create_user(db=db, user=user)
+    if result:
+        return result
+    else:
+        response.status_code = status.HTTP_226_IM_USED
+        return {"data" : f"username {user.username} is already in use"}
