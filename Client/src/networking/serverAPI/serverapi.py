@@ -2,6 +2,8 @@ import requests
 from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
+from src.networking.serverAPI.user import User, SignedUsed
+
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 REMOTE = "http://localhost:8000"
@@ -76,10 +78,10 @@ class ServerAPI:
     @staticmethod
     def try_authenticate_user(user: AuthUser):
         try:
-            #headers = {'content-type' : 'application/json'}
-            #headers = {'content-type' : 'application/x-www-form-urlencoded'}
-            #print(user.json())
             response = requests.post(REMOTE+"/auth/token", data=user.json())
+            token = response.json()["access_token"]
+            print(user.username,token)
+            User.me = SignedUsed(User.me,user.username,token)
             return Response(ServerAPI._decode(response.status_code),response.json())
         except requests.ConnectionError:
             return Response(ResponseStatus.ConnectionError)

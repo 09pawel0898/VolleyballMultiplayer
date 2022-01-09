@@ -1,12 +1,10 @@
 from src.core.states.stateManager import *
 from src.states.mainmenu.mainMenuState import MainMenuState
-from src.states.gameplay.gameplayState import *
+from src.states.gameplay.gameplayState import GameplayState
+from src.states.lobby.lobbyState import LobbyState
 from src.core.resources.texture import *
-from src.networking.serverAPI.user import User, user
 
 class Client:
-    user : User = user
-
     def __init__(self, viewport_x: int, viewport_y: int) -> None:
         self._window = pygame.display.set_mode([viewport_x, viewport_y])
         pygame.display.set_caption("Volleyball")
@@ -19,8 +17,9 @@ class Client:
         self._dt = 0
 
     def _init_states(self):
-        self._state_manager.register_state("MainMenuState",MainMenuState)
-        self._state_manager.register_state("GameplayState",GameplayState)
+        self._state_manager.register_state("MainMenuState", MainMenuState)
+        self._state_manager.register_state("GameplayState", GameplayState)
+        self._state_manager.register_state("LobbyState", LobbyState)
 
     def _update(self,delta_time: Optional[float] = None) -> None:
         if delta_time is not None:

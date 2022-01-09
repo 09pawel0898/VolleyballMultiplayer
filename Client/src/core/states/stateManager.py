@@ -25,7 +25,6 @@ class StateManager:
         assert(state_name in self._state_constructors)
         return self._state_constructors.get(state_name)
 
-
     def _do_pending_actions(self) -> None:
         for pending in self._pending_actions:
             if pending.action == Action.ADD:
@@ -62,4 +61,3 @@ class StateManager:
 
     def is_empty(self) -> bool:
         return self._states.is_empty()
-

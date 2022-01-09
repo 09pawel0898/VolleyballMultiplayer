@@ -6,8 +6,8 @@ from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
-from src.states.mainmenu.mainMenuActivity import MainMenuActivity, user, MainMenuActivityState
-
+from src.states.mainmenu.mainMenuActivity import MainMenuActivity, MainMenuActivityState
+from src.networking.serverAPI.user import User
 
 class UIAnimState(Enum):
     LoginPanelSlideIn = 1
@@ -24,6 +24,7 @@ class MainMenuState(State):
         self._init_state_content()
         self._init_widgets()
         self._init_msg_box()
+        self._init_user()
         self.bInputEnabled = False
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
@@ -31,10 +32,9 @@ class MainMenuState(State):
         self.UIAnimState = UIAnimState.LoginPanelSlideIn
         self.beforeMsgAnimState = self.UIAnimState
 
-        #user init
-        self.user = user
-        self.user.activity = MainMenuActivity()
-        self.user.state = StateID.MainMenu
+    def _init_user(self):
+        User.me.activity = MainMenuActivity()
+        User.me.state = StateID.MainMenu
 
     def _init_resources(self):
         textures_to_init={
@@ -139,7 +139,7 @@ class MainMenuState(State):
         password = self.widget_manager.get_widget("PasswordInputBoxLP").text
 
         ApiReqThread.new_request(ApiRequest(PendingRequest.POST_SigninUser, data=(login, password)))
-        self.user.activity.set_state(MainMenuActivityState.WaitingForSignInResponse)
+        User.me.activity.set_state(MainMenuActivityState.WaitingForSignInResponse)
         self.bInputEnabled = False
 
     def _sign_up_onclick(self):
@@ -168,7 +168,7 @@ class MainMenuState(State):
             case AuthStatus.EmailNotValid:      self.show_msg_box("Invalid email.")
             case AuthStatus.Valid:
                 ApiReqThread.new_request(ApiRequest(PendingRequest.POST_RegisterUser, data = (login, password, email)))
-                self.user.activity.set_state(MainMenuActivityState.WaitingForSignUpResponse)
+                User.me.activity.set_state(MainMenuActivityState.WaitingForSignUpResponse)
                 self.bInputEnabled = False
                 #if status == SignUpStatus.SignedUp:
                 #    self._show_msg_box("User registered successfully!")
@@ -400,14 +400,10 @@ class MainMenuState(State):
             self.msgButton.update(dt)
         else:
             self.widget_manager.update_widgets(dt)
-
         self._update_ui(dt)
         self._update_logo_anim(dt)
         self._update_clouds(dt)
 
-        user.activity.handle_response(self,ApiReqThread.try_get_response())
-        #response =
-        #if response is not None:
-        #    print(response)
+        User.me.activity.handle_response(self,ApiReqThread.try_get_response())
 
 

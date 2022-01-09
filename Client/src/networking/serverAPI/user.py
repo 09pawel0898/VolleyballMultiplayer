@@ -5,21 +5,24 @@ from enum import Enum
 class UserLobbyActivity(Enum):
     Idle = 1
 
-# this class handles user data
-class User:
-    def __init__(self):
+class BaseUser:
+    def __init__(self) -> None:
         self.state : StateID
         self.activity : UserActivity
 
-class SignedUsed(User):
-    def __init__(self, username):
-        super(SignedUsed, self).__init__()
+class Guest(BaseUser):
+    def __init__(self) -> None:
+        super().__init__()
+
+class SignedUsed(BaseUser):
+    def __init__(self, guest : Guest,username : str, token : str) -> None:
+        super().__init__()
         self.username = username
-        #self.token = ..
+        self.token = token
+        self.state = guest.state
+        self.activity = guest.activity
 
-class Guest(User):
-    def __init__(self):
-        super(Guest, self).__init__()
+class User:
+    me = Guest()
 
-user = Guest()
 

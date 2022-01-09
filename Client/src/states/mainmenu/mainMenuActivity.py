@@ -1,7 +1,8 @@
 from src.networking.serverAPI.useractivity import *
-from src.networking.serverAPI.user import user
 from src.networking.serverAPI.serverapi import ResponseStatus
+from src.networking.serverAPI.user import User, SignedUsed
 from src.core.defines import DEBUG
+import json
 
 from enum import Enum
 
@@ -13,10 +14,9 @@ class MainMenuActivityState(Enum):
 class MainMenuActivity(UserActivity):
     def __init__(self):
         super(MainMenuActivity, self).__init__()
-        self._user = user
         self._activity_state = MainMenuActivityState.Idle
 
-    def handle_response(self, state, response : Optional[ApiResponse] = None) -> bool:
+    def handle_response(self, state, response) -> bool:
         if response is not None:
             if DEBUG:
                 print(response)
@@ -29,10 +29,10 @@ class MainMenuActivity(UserActivity):
                     state.show_msg_box("This username is already taken.")
                     self._activity_state = MainMenuActivityState.Idle
                     return True
-            if self._activity_state == MainMenuActivityState.WaitingForSignInResponse:
+            elif self._activity_state == MainMenuActivityState.WaitingForSignInResponse:
                 if response.response.status == ResponseStatus.SignedIn:
-                    state.show_msg_box("Logged in.")
                     self._activity_state = MainMenuActivityState.Idle
+                    state.state_manager.push_state("LobbyState")
                     return True
                 elif response.response.status == ResponseStatus.BadAuth:
                     state.show_msg_box("Bad username or password.")

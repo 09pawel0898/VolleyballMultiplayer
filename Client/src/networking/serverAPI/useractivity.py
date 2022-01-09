@@ -1,12 +1,12 @@
 from abc import ABC,abstractmethod
-from src.networking.serverAPI.serverapi import ApiResponse
 from typing import Optional
 
-class UserActivity:
+# server api related user activity
+class UserActivity(ABC):
     def __init__(self):
         pass
 
     @abstractmethod
-    def handle_response(self, state, response : Optional[ApiResponse] = None):
+    def handle_response(self, state, response):
         if response is not None:
             print(response)
