@@ -16,6 +16,8 @@ class ResponseStatus(Enum):
     UsernameTaken = 4
     ConnectionError = 5
     TimeoutError = 6
+    SignedIn = 7
+    BadAuth = 8
 
 class PendingRequest(Enum):
     GET_Temp = 1
@@ -57,6 +59,9 @@ class ServerAPI:
     #def temp() -> Response:
     #    response = requests.get(REMOTE + "/temp/")
     #    return Response(ServerAPI._decode(response.status_code),response.json())
+    @staticmethod
+    def try_authenticate_user(self):
+        pass
 
     @staticmethod
     def try_register_user(user: NewUser) -> Response:

@@ -1,10 +1,12 @@
 from src.core.states.stateManager import *
-from src.states.mainmenu.mainMenuState import *
+from src.states.mainmenu.mainMenuState import MainMenuState
 from src.states.gameplay.gameplayState import *
 from src.core.resources.texture import *
-from src.networking.serverAPI.user import User,Guest
+from src.networking.serverAPI.user import User, user
 
 class Client:
+    user : User = user
+
     def __init__(self, viewport_x: int, viewport_y: int) -> None:
         self._window = pygame.display.set_mode([viewport_x, viewport_y])
         pygame.display.set_caption("Volleyball")

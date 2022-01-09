@@ -1,11 +1,12 @@
 from src.core.states.state import *
+from src.core.states.stateidentifiers import StateID
 from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
-from src.networking.serverAPI.user import user, SignedUsed
+from src.states.mainmenu.mainMenuActivity import MainMenuActivity, user, MainMenuActivityState
 
 
 class UIAnimState(Enum):
@@ -26,8 +27,14 @@ class MainMenuState(State):
         self.bInputEnabled = False
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
+        self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.LoginPanelSlideIn
         self.beforeMsgAnimState = self.UIAnimState
+
+        #user init
+        self.user = user
+        self.user.activity = MainMenuActivity()
+        self.user.state = StateID.MainMenu
 
     def _init_resources(self):
         textures_to_init={
@@ -81,6 +88,7 @@ class MainMenuState(State):
                                         Button(Vec2(490, 900),
                                         texture_manager.get_resource(TextureID.ButtonRegister),
                                         ButtonBehaviour.NoBehaviour))
+
         self.widget_manager.init_widget(
             "LoginInputBoxRP",
             TextBox(Vec2(485, 630), "username", 240, 1, LocalAuth.MAX_LOGIN_LEN,"Agency FB", 25, "clear", False))
@@ -113,7 +121,7 @@ class MainMenuState(State):
         self.bMsgPanelActive = False
 
 
-    def _show_msg_box(self,message):
+    def show_msg_box(self, message):
         self.beforeMsgAnimState = self.UIAnimState
         self.UIAnimState = UIAnimState.MessageBoxShowed
         self.bInputEnabled = True
@@ -127,7 +135,7 @@ class MainMenuState(State):
 
     #button onclick handlers
     def _sign_in_onclick(self):
-        self._show_msg_box("Mess")
+        self.show_msg_box("Mess")
         self.widget_manager.deactivate_textboxes()
 
     def _sign_up_onclick(self):
@@ -150,13 +158,14 @@ class MainMenuState(State):
             login, password, confirmed, email
         )
         match validation_status:
-            case AuthStatus.BadUsername:        self._show_msg_box("Bad username.")
-            case AuthStatus.PasswordTooWeak:    self._show_msg_box("Your password is too weak.")
-            case AuthStatus.PasswordsNotMatch:  self._show_msg_box("Passwords do not match.")
-            case AuthStatus.EmailNotValid:      self._show_msg_box("Invalid email.")
+            case AuthStatus.BadUsername:        self.show_msg_box("Bad username.")
+            case AuthStatus.PasswordTooWeak:    self.show_msg_box("Your password is too weak.")
+            case AuthStatus.PasswordsNotMatch:  self.show_msg_box("Passwords do not match.")
+            case AuthStatus.EmailNotValid:      self.show_msg_box("Invalid email.")
             case AuthStatus.Valid:
                 ApiReqThread.new_request(ApiRequest(PendingRequest.POST_RegisterUser, data = (login, password)))
-
+                self.user.activity.set_state(MainMenuActivityState.WaitingForSignUpResponse)
+                self.bInputEnabled = False
                 #if status == SignUpStatus.SignedUp:
                 #    self._show_msg_box("User registered successfully!")
                 #elif status == SignUpStatus.UsernameTaken:
@@ -166,21 +175,33 @@ class MainMenuState(State):
         texture_manager = self.state_manager.context.texture_manager
 
         #background
-        self.backgroundLayer0 = Sprite(texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT)
-        self.backgroundLayer1 = Sprite(texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT)
+        self.backgroundLayer0 = Sprite(
+            texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT)
+        self.backgroundLayer1 = Sprite(
+            texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT)
+
         #clouds
         self.cloudsPool : [Sprite] = []
-        self.cloudsPool.append(Sprite(texture_manager.get_resource(
-            TextureID.Clouds), origin=Origin.TOP_LEFT, position=Vec2(-self.context.window.get_width(), 0)))
-        self.cloudsPool.append(Sprite(texture_manager.get_resource(
-            TextureID.Clouds), origin=Origin.TOP_LEFT, position=Vec2(-self.context.window.get_width() * 2, 0)))
+        self.cloudsPool.append(
+            Sprite(texture_manager.get_resource(TextureID.Clouds),
+                   origin=Origin.TOP_LEFT,
+                   position=Vec2(-self.context.window.get_width(), 0)))
+
+        self.cloudsPool.append(
+            Sprite(texture_manager.get_resource(TextureID.Clouds),
+                   origin=Origin.TOP_LEFT,
+                   position=Vec2(-self.context.window.get_width() * 2, 0)))
         #logo
         self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT)
         #panels
-        self.login_panel = Sprite(texture_manager.get_resource(
-            TextureID.LoginPanel), origin=Origin.TOP_LEFT, position=Vec2(0,500))
-        self.register_panel = Sprite(texture_manager.get_resource(
-            TextureID.RegisterPanel), origin=Origin.TOP_LEFT, position=Vec2(0, 500))
+        self.login_panel = Sprite(
+            texture_manager.get_resource(TextureID.LoginPanel),
+            origin=Origin.TOP_LEFT,
+            position=Vec2(0,500))
+        self.register_panel = Sprite(
+            texture_manager.get_resource(TextureID.RegisterPanel),
+            origin=Origin.TOP_LEFT,
+            position=Vec2(0, 500))
         self.login_panel_init_pos = self.register_panel_init_pos = self.login_panel.position.y
 
     def _on_render(self) -> None:
@@ -380,8 +401,9 @@ class MainMenuState(State):
         self._update_logo_anim(dt)
         self._update_clouds(dt)
 
-        response = ApiReqThread.try_get_response()
-        if response is not None:
-            pass
+        user.activity.handle_response(self,ApiReqThread.try_get_response())
+        #response =
+        #if response is not None:
+        #    print(response)
 
 
