@@ -9,12 +9,11 @@ class Origin(Enum):
     BOTTOM_LEFT = 3
     BOTTOM_RIGHT = 4
     CENTER = 5
-
-
+    
 class Sprite:
     def __init__(self, texture : Texture,
                  origin : Origin = Origin.CENTER,
-                 position: Vec2 = Vec2(0, 0)) -> None:
+                 position: Vec2 = Vec2(0.0, 0.0)) -> None:
         self.texture : Texture = texture
         self.origin : Origin = origin
         self.position : Vec2 = position

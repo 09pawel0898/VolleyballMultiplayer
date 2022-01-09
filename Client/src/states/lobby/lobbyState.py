@@ -69,9 +69,9 @@ class LobbyState(State):
 
         #background
         self.backgroundLayer0 = Sprite(
-            texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT)
+            texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT, position=Vec2(0,0))
         self.backgroundLayer1 = Sprite(
-            texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT)
+            texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT, position=Vec2(0,0))
 
         #clouds
         self.cloudsPool : [Sprite] = []
@@ -85,7 +85,7 @@ class LobbyState(State):
                    origin=Origin.TOP_LEFT,
                    position=Vec2(-self.context.window.get_width() * 2, 0)))
         #logo
-        self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT)
+        self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT, position=Vec2(0,0))
 
     def _on_render(self) -> None:
         window = self.context.window

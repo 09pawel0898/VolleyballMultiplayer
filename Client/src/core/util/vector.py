@@ -1,4 +1,4 @@
 class Vec2:
-    def __init__(self,x: int = 0, y: int = 0):
+    def __init__(self,x: float = 0, y: float = 0):
         self.x = x
         self.y = y
