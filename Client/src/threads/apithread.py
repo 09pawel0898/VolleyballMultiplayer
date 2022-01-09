@@ -4,7 +4,6 @@ import time
 from queue import Queue
 from src.networking.serverAPI.serverapi import *
 
-
 class ApiReqThread:
     _thread : threading.Thread
     _bRunning = False
@@ -27,10 +26,16 @@ class ApiReqThread:
         response = None
         match request.type:
             case PendingRequest.GET_Temp:
-                response = ServerAPI.temp()
+                #response = ServerAPI.temp()
+                pass
             case PendingRequest.POST_RegisterUser:
-                response = ServerAPI.try_register_user(NewUser(username=request.data[0],
-                                                               password=request.data[1]))
+                response = ServerAPI.try_register_user(
+                    NewUser(username=request.data[0],password=request.data[1],email=request.data[2]))
+
+            case PendingRequest.POST_SigninUser:
+                response = ServerAPI.try_authenticate_user(
+                    AuthUser(username=request.data[0],password=request.data[1]))
+
         if response is not None:
             ApiReqThread._responseQueue.put(ApiResponse(request, response))
 

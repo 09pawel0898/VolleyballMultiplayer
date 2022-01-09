@@ -23,7 +23,9 @@ def get_user(db,username: str):
     return db.query(models.Users).filter(models.Users.username == username).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    db_user = models.Users(username=user.username, hashed_password=get_password_hash(user.password))
+    db_user = models.Users(username=user.username,
+                           hashed_password=get_password_hash(user.password),
+                           email=user.email)
     existing_user = db.query(models.Users).filter(models.Users.username == user.username).first()
     if not existing_user:
         db.add(db_user)

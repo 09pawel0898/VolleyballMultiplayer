@@ -135,8 +135,12 @@ class MainMenuState(State):
 
     #button onclick handlers
     def _sign_in_onclick(self):
-        self.show_msg_box("Mess")
-        self.widget_manager.deactivate_textboxes()
+        login = self.widget_manager.get_widget("LoginInputBoxLP").text
+        password = self.widget_manager.get_widget("PasswordInputBoxLP").text
+
+        ApiReqThread.new_request(ApiRequest(PendingRequest.POST_SigninUser, data=(login, password)))
+        self.user.activity.set_state(MainMenuActivityState.WaitingForSignInResponse)
+        self.bInputEnabled = False
 
     def _sign_up_onclick(self):
         self.UIAnimState = UIAnimState.LoginPanelSlideOut
@@ -163,7 +167,7 @@ class MainMenuState(State):
             case AuthStatus.PasswordsNotMatch:  self.show_msg_box("Passwords do not match.")
             case AuthStatus.EmailNotValid:      self.show_msg_box("Invalid email.")
             case AuthStatus.Valid:
-                ApiReqThread.new_request(ApiRequest(PendingRequest.POST_RegisterUser, data = (login, password)))
+                ApiReqThread.new_request(ApiRequest(PendingRequest.POST_RegisterUser, data = (login, password, email)))
                 self.user.activity.set_state(MainMenuActivityState.WaitingForSignUpResponse)
                 self.bInputEnabled = False
                 #if status == SignUpStatus.SignedUp:

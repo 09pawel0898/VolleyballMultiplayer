@@ -32,11 +32,12 @@ def get_current_user(db: Session = Depends(get_db),token: str = Depends(oauth2_s
         raise credentials_exception
     return user
 
-
-@router.post("/token", response_model=schemas.Token, status_code=status.HTTP_201_CREATED)
-def login_for_access_token(db: Session = Depends(get_db),form_data: OAuth2PasswordRequestForm = Depends()):
-    user = crud.authenticate_user(db, form_data.username, form_data.password)
+@router.post("/auth/token", response_model=schemas.Token, status_code=status.HTTP_202_ACCEPTED)
+def login_for_access_token(auth_user: schemas.UserAuth, db: Session = Depends(get_db)):
+    print(auth_user.username, auth_user.password)
+    user = crud.authenticate_user(db, auth_user.username, auth_user.password)
     if not user:
+        #response.status_code = status.HTTP_401_UNAUTHORIZED
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -52,7 +53,7 @@ def login_for_access_token(db: Session = Depends(get_db),form_data: OAuth2Passwo
 def read_users_me(current_user: models.Users = Depends(get_current_user)):
     return current_user
 
-@router.post("/user-new/", status_code=status.HTTP_201_CREATED)
+@router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 def create_user(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
     result = crud.create_user(db=db, user=user)
     if result:
