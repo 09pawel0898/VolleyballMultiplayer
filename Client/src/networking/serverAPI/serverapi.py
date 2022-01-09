@@ -5,7 +5,7 @@ from typing import Optional
 
 REMOTE = "http://localhost:8000"
 
-class User(BaseModel):
+class NewUser(BaseModel):
     username: str
     password: str
 
@@ -53,13 +53,13 @@ class ServerAPI:
         226: ResponseStatus.UsernameTaken
     }
 
-    @staticmethod
-    def temp() -> Response:
-        response = requests.get(REMOTE + "/temp/")
-        return Response(ServerAPI._decode(response.status_code),response.json())
+    #@staticmethod
+    #def temp() -> Response:
+    #    response = requests.get(REMOTE + "/temp/")
+    #    return Response(ServerAPI._decode(response.status_code),response.json())
 
     @staticmethod
-    def try_register_user(user: User) -> Response:
+    def try_register_user(user: NewUser) -> Response:
         try:
             response = requests.post(REMOTE+"/user-new/",data = user.json())
             return Response(ServerAPI._decode(response.status_code),response.json())

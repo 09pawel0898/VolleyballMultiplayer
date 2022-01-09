@@ -1,13 +1,13 @@
 from src.core.states.stateManager import *
-from src.states.mainMenuState import *
-from src.states.gameplayState import *
+from src.states.mainmenu.mainMenuState import *
+from src.states.gameplay.gameplayState import *
 from src.core.resources.texture import *
+from src.networking.serverAPI.user import User,Guest
 
 class Client:
     def __init__(self, viewport_x: int, viewport_y: int) -> None:
         self._window = pygame.display.set_mode([viewport_x, viewport_y])
         pygame.display.set_caption("Volleyball")
-        #self._window = screenSize(viewport_x,viewport_y)
         self._running = False
         self._texture_manager = ResourceManager[Texture]()
         self._context = Context(self._window, self._texture_manager)

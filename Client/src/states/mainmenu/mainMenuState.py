@@ -5,6 +5,7 @@ from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
+from src.networking.serverAPI.user import user, SignedUsed
 
 
 class UIAnimState(Enum):

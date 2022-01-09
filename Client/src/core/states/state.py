@@ -1,7 +1,8 @@
-from src.core.resources.resourceManager import *
+from src.core.resources.resourcemanager import *
 from abc import ABC, abstractmethod
 from src.core.resources.sprite import *
 from src.core.widgets.widgetManager import WidgetManager
+from src.core.resources.resourceidentifiers import TextureID
 from typing import List
 
 # unique per application
