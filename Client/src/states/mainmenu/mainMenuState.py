@@ -24,7 +24,6 @@ class MainMenuState(State):
         self._init_state_content()
         self._init_widgets()
         self._init_msg_box()
-        self._init_user()
         self.bInputEnabled = False
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
@@ -32,10 +31,17 @@ class MainMenuState(State):
         self.UIAnimState = UIAnimState.LoginPanelSlideIn
         self.beforeMsgAnimState = self.UIAnimState
 
+    #immediate login temporary user
+    def _debug(self):
+        User.me.activity.set_state(MainMenuActivityState.WaitingForSignInResponse)
+        ApiReqThread.new_request(ApiRequest(PendingRequest.POST_SigninUser, data=("admin123", "admin123")))
+        self.bInputEnabled = False
+
     def _init_user(self):
         User.me.activity = MainMenuActivity()
         User.me.state = StateID.MainMenu
         User.me.activity.set_state(MainMenuActivityState.Idle)
+        self._debug()
 
     def _init_resources(self):
         textures_to_init={
@@ -131,6 +137,7 @@ class MainMenuState(State):
                                origin=Origin.TOP_LEFT)
         self.msgLabel = Label(Vec2(300,188),"Message",30,font="Agency FB")
         self.msgButton = Button(Vec2(449,253),texture_manager.get_resource(TextureID.ButtonOk))
+        self.msgButton.set_position(449,253)
         self.msgButton.set_callback(self._hide_msg_box)
         self.bMsgPanelActive = False
 
