@@ -7,7 +7,8 @@ from src.core.util.utilis import lerp, start_delayed
 from src.core.util.localauth import LocalAuth, AuthStatus
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
 from src.states.lobby.lobbyActivity import LobbyActivity, LobbyActivityState
-from src.networking.serverAPI.user import User
+from src.networking.serverAPI.user import User, Guest
+from datetime import datetime
 
 class UIAnimState(Enum):
      Temp = 1
@@ -21,7 +22,7 @@ class LobbyState(State):
         self._init_widgets()
         self._init_msg_box()
         self._init_user()
-        self.bInputEnabled = False
+        self.bInputEnabled = True
         self.bLogoAnimEnabled = True
         self.bLogoAnimGoingDown = True
         self.bMsgPanelActive = False
@@ -32,6 +33,10 @@ class LobbyState(State):
     def _init_user(self):
         User.me.activity = LobbyActivity()
         User.me.state = StateID.Lobby
+
+        self.widget_manager.get_widget("UsernameLabel").set_text("Guest")
+        self.widget_manager.get_widget("WinRateLabel").set_text("0/0")
+
 
     def _init_resources(self):
         textures_to_init={
@@ -60,6 +65,8 @@ class LobbyState(State):
 
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
+
+        #buttons
         self.widget_manager.init_widget(
             "ButtonCreate",
             Button(Vec2(66, 130), texture_manager.get_resource(TextureID.ButtonCreate), ButtonBehaviour.SlideRight))
@@ -73,6 +80,24 @@ class LobbyState(State):
         self.widget_manager.init_widget(
             "ButtonLogout",
             Button(Vec2(66, 430), texture_manager.get_resource(TextureID.ButtonLogout), ButtonBehaviour.SlideRight))
+
+        #labels
+        self.widget_manager.init_widget(
+            "UsernameLabel",
+            Label(Vec2(170,36),"",30,font="Agency FB"))
+        self.widget_manager.init_widget(
+            "WinRateLabel",
+            Label(Vec2(480, 36), "0/0", 30, font="Agency FB"))
+        self.widget_manager.init_widget(
+            "TimeLabel",
+            Label(Vec2(767,27), "",50,font="Agency FB")
+        )
+
+        self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user)
+
+    def _logout_user(self):
+        User.me = Guest()
+        self.state_manager.pop_state()
 
     def _init_msg_box(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -142,7 +167,10 @@ class LobbyState(State):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.bInputEnabled:
-                    pass
+                    self.widget_manager.get_widget("ButtonLogout").check_for_onclick()
+                    self.widget_manager.get_widget("ButtonCreate").check_for_onclick()
+                    self.widget_manager.get_widget("ButtonJoin").check_for_onclick()
+                    self.widget_manager.get_widget("ButtonLeaderboard").check_for_onclick()
 
     def _on_awake(self) -> None:
         pass
@@ -166,5 +194,9 @@ class LobbyState(State):
         self._update_clouds(dt)
 
         User.me.activity.handle_response(self,ApiReqThread.try_get_response())
+
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+        self.widget_manager.get_widget("TimeLabel").set_text(current_time)
 
 

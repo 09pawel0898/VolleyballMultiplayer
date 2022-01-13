@@ -35,6 +35,7 @@ class MainMenuState(State):
     def _init_user(self):
         User.me.activity = MainMenuActivity()
         User.me.state = StateID.MainMenu
+        User.me.activity.set_state(MainMenuActivityState.Idle)
 
     def _init_resources(self):
         textures_to_init={
@@ -109,6 +110,19 @@ class MainMenuState(State):
         # buttons callbacks
         self.widget_manager.get_widget("ButtonBack").set_callback(self._back_onclick)
         self.widget_manager.get_widget("ButtonRegister").set_callback(self._register_onclick)
+
+    def _re_init_login_panel(self):
+        initial_positions_y = [834, 906, 695, 765]
+        self.login_panel.set_position(0,500)
+        self.widget_manager.get_widget("ButtonSignIn").set_position(
+            self.widget_manager.get_widget("ButtonSignIn").pos.x,initial_positions_y[0])
+        self.widget_manager.get_widget("ButtonSignUp").set_position(
+            self.widget_manager.get_widget("ButtonSignUp").pos.x, initial_positions_y[1])
+        self.widget_manager.get_widget("LoginInputBoxLP").set_position(
+            self.widget_manager.get_widget("LoginInputBoxLP").pos.x, initial_positions_y[2])
+        self.widget_manager.get_widget("PasswordInputBoxLP").set_position(
+            self.widget_manager.get_widget("PasswordInputBoxLP").pos.x, initial_positions_y[3])
+        self.UIAnimState = UIAnimState.LoginPanelSlideIn
 
     def _init_msg_box(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -279,7 +293,14 @@ class MainMenuState(State):
                         self.msgButton.check_for_onclick()
 
     def _on_awake(self) -> None:
-        pass
+        self._init_user()
+        self._re_init_login_panel()
+        self.bInputEnabled = False
+        self.bLogoAnimEnabled = False
+        self.bLogoAnimGoingDown = True
+        self.bMsgPanelActive = False
+        self.UIAnimState = UIAnimState.LoginPanelSlideIn
+        self.beforeMsgAnimState = self.UIAnimState
 
     def _enable_logo_anim(self):
         self.bLogoAnimEnabled = True

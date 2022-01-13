@@ -10,7 +10,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def get_current_user(db: Session = Depends(get_db),token: str = Depends(oauth2_scheme)):
@@ -34,7 +34,7 @@ def get_current_user(db: Session = Depends(get_db),token: str = Depends(oauth2_s
 
 @router.post("/auth/token", response_model=schemas.Token, status_code=status.HTTP_202_ACCEPTED)
 def login_for_access_token(auth_user: schemas.UserAuth, db: Session = Depends(get_db)):
-    print(auth_user.username, auth_user.password)
+    #print(auth_user.username, auth_user.password)
     user = crud.authenticate_user(db, auth_user.username, auth_user.password)
     if not user:
         #response.status_code = status.HTTP_401_UNAUTHORIZED
