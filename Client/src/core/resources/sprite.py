@@ -9,7 +9,7 @@ class Origin(Enum):
     BOTTOM_LEFT = 3
     BOTTOM_RIGHT = 4
     CENTER = 5
-    
+
 class Sprite:
     def __init__(self, texture : Texture,
                  origin : Origin = Origin.CENTER,

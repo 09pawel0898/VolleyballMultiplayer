@@ -16,3 +16,8 @@ class TextureID(Enum):
     RegisterPanel = 13
     ButtonBack = 14
     MessageBox = 15
+    LobbyUserPanel = 16
+    ButtonCreate = 17
+    ButtonJoin = 18
+    ButtonLeaderboard = 19
+    ButtonLogout = 20

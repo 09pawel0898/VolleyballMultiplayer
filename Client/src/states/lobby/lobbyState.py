@@ -34,12 +34,45 @@ class LobbyState(State):
         User.me.state = StateID.Lobby
 
     def _init_resources(self):
-        textures_to_init={}
+        textures_to_init={
+            #placeholder --->
+            TextureID.BackgroundLayer0: "res/img/background_layer0.png",
+            TextureID.BackgroundLayer1: "res/img/background_layer1.png",
+            TextureID.LoginPanel: "res/img/login_panel.png",
+            TextureID.RegisterPanel: "res/img/register_panel.png",
+            TextureID.Logo: "res/img/logo.png",
+            TextureID.Clouds: "res/img/clouds.png",
+            TextureID.ButtonSignIn: "res/img/button_signin.png",
+            TextureID.ButtonSignUp: "res/img/button_signup.png",
+            TextureID.ButtonBack: "res/img/button_back.png",
+            TextureID.ButtonRegister: "res/img/button_register.png",
+            TextureID.MessageBox: "res/img/info_panel.png",
+            TextureID.ButtonOk: "res/img/button_ok.png",
+            #placeholder <---
+            TextureID.ButtonCreate: "res/img/button_create.png",
+            TextureID.ButtonJoin: "res/img/button_join.png",
+            TextureID.ButtonLeaderboard: "res/img/button_leaderboard.png",
+            TextureID.ButtonLogout: "res/img/button_logout.png",
+            TextureID.LobbyUserPanel : "res/img/lobby.png"
+        }
         for key in textures_to_init:
             self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
 
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
+        self.widget_manager.init_widget(
+            "ButtonCreate",
+            Button(Vec2(66, 130), texture_manager.get_resource(TextureID.ButtonCreate), ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget(
+            "ButtonJoin",
+            Button(Vec2(66, 230), texture_manager.get_resource(TextureID.ButtonJoin), ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget(
+            "ButtonLeaderboard",
+            Button(Vec2(66, 330), texture_manager.get_resource(TextureID.ButtonLeaderboard),
+                   ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget(
+            "ButtonLogout",
+            Button(Vec2(66, 430), texture_manager.get_resource(TextureID.ButtonLogout), ButtonBehaviour.SlideRight))
 
     def _init_msg_box(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -72,7 +105,9 @@ class LobbyState(State):
             texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT, position=Vec2(0,0))
         self.backgroundLayer1 = Sprite(
             texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT, position=Vec2(0,0))
-
+        #user panel
+        self.userPanel = Sprite(
+            texture_manager.get_resource(TextureID.LobbyUserPanel), origin=Origin.TOP_LEFT, position=Vec2(0,0))
         #clouds
         self.cloudsPool : [Sprite] = []
         self.cloudsPool.append(
@@ -84,8 +119,6 @@ class LobbyState(State):
             Sprite(texture_manager.get_resource(TextureID.Clouds),
                    origin=Origin.TOP_LEFT,
                    position=Vec2(-self.context.window.get_width() * 2, 0)))
-        #logo
-        self.logo = Sprite(texture_manager.get_resource(TextureID.Logo), origin=Origin.TOP_LEFT, position=Vec2(0,0))
 
     def _on_render(self) -> None:
         window = self.context.window
@@ -95,7 +128,7 @@ class LobbyState(State):
         self.cloudsPool[1].draw(window)
         self.backgroundLayer1.draw(window)
         #logo
-        self.logo.draw(window)
+        self.userPanel.draw(window)
         #widgets
         self.widget_manager.draw_widgets(window)
         #message box
@@ -114,19 +147,6 @@ class LobbyState(State):
     def _on_awake(self) -> None:
         pass
 
-    def _update_logo_anim(self, dt):
-        if self.bLogoAnimEnabled:
-            if self.bLogoAnimGoingDown:
-                if self.logo.position.y < 12.0:
-                    self.logo.set_position(0, lerp(self.logo.position.y, 16.0, dt*0.002))
-                else:
-                    self.bLogoAnimGoingDown = False
-            else:
-                if self.logo.position.y > 1:
-                    self.logo.set_position(0, lerp(self.logo.position.y, -5.0, dt*0.002))
-                else:
-                    self.bLogoAnimGoingDown = True
-
     def _update_clouds(self, dt):
         for clouds in self.cloudsPool:
             clouds.move(Vec2(0.1*dt, 0))
@@ -143,7 +163,6 @@ class LobbyState(State):
         else:
             self.widget_manager.update_widgets(dt)
         self._update_ui(dt)
-        self._update_logo_anim(dt)
         self._update_clouds(dt)
 
         User.me.activity.handle_response(self,ApiReqThread.try_get_response())

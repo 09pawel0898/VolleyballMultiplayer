@@ -2,7 +2,7 @@ from src.core.widgets.widget import Widget
 from src.core.util.vector import Vec2
 from src.core.util.utilis import lerp
 from src.core.resources.texture import Texture
-from ..resources.sprite import Origin
+from src.core.resources.sprite import Origin
 
 from typing import Callable
 from enum import Enum
@@ -21,7 +21,7 @@ class Button(Widget):
         self.image = texture.image
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.pos.x, self.pos.y]
-        self._callback : Callable = None
+        self._callback = None
         self._initial_pos = Vec2(pos.x,pos.y)
         self._initial_size = Vec2(self.rect.width,self.rect.height)
         self._behaviour = behaviour
@@ -29,7 +29,7 @@ class Button(Widget):
         #self.notScaledImage = self.image.copy()
         #self.scaledImage = self.set_scale(1.1)
         self.bCovered = False
-        #self.rect.left -=1000.0
+        self.rect.left -=1000.0
 
     def _cursor_in_bounds(self, mouse_pos):
         if self.rect.left <= mouse_pos[0] <= self.rect.right and self.rect.top <= mouse_pos[1] <= self.rect.bottom:
@@ -80,7 +80,7 @@ class Button(Widget):
         return pygame.transform.scale(self.image,
                                       (self._initial_size.x*new_scale,self._initial_size.y*new_scale))
 
-    def set_position(self,x: int, y: int) -> None:
+    def set_position(self,x: float, y: float) -> None:
         self.pos.x = self.rect.left = x
         self.pos.y = self.rect.top = y
 
