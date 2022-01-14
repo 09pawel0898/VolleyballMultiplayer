@@ -17,7 +17,6 @@ class AuthUser(BaseModel):
     username: str
     password: str
 
-
 class ResponseStatus(Enum):
     Test = 1
     Ok = 2
