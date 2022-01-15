@@ -12,6 +12,9 @@ class User(BaseModel):
     username: str
     email: str
 
+class UserAuthenticated(Token):
+    username: str
+
 class UserInDB(User):
     hashed_password: str
 

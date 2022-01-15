@@ -13,6 +13,10 @@ class NewUser(BaseModel):
     password: str
     email: str
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 class AuthUser(BaseModel):
     username: str
     password: str
@@ -29,8 +33,9 @@ class ResponseStatus(Enum):
 
 class PendingRequest(Enum):
     GET_Temp = 1
-    POST_RegisterUser = 2
-    POST_SigninUser = 3
+    GET_Me = 2
+    POST_RegisterUser = 3
+    POST_SigninUser = 4
 
 # contains ResponseStatus and data
 class Response:
@@ -73,6 +78,20 @@ class ServerAPI:
     #def temp() -> Response:
     #    response = requests.get(REMOTE + "/temp/")
     #    return Response(ServerAPI._decode(response.status_code),response.json())
+
+    @staticmethod
+    def try_get_me():
+        try:
+            token = Token(access_token=User.me.token, token_type="bearer")
+            response = requests.get(REMOTE+"/users/me",data = token.json())
+            if response.status_code == 200:
+                print(response.json())
+            return Response(ServerAPI._decode(response.status_code),response.json())
+        except requests.ConnectionError:
+            return Response(ResponseStatus.ConnectionError)
+        except requests.Timeout:
+            return Response(ResponseStatus.TimeoutError)
+
 
     @staticmethod
     def try_authenticate_user(user: AuthUser):

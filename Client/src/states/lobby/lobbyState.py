@@ -30,7 +30,10 @@ class LobbyState(State):
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.Temp
         self.beforeMsgAnimState = self.UIAnimState
+        self.get_me()
 
+    def get_me(self):
+        ApiReqThread.new_request(ApiRequest(PendingRequest.GET_Me))
 
     def _init_user(self):
         User.me.activity = LobbyActivity()
