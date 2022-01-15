@@ -11,7 +11,7 @@ router = APIRouter(
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
+async def create_user(user: schemas.UserCreate, response: Response, db: Session = Depends(get_db)):
     result = crud.create_user(db=db, user=user)
     if result:
         return result
@@ -20,7 +20,7 @@ def create_user(user: schemas.UserCreate, response: Response, db: Session = Depe
         return {"data" : f"username {user.username} is already in use"}
 
 @router.post("/auth/login", response_model=schemas.Token, status_code=status.HTTP_202_ACCEPTED)
-def login_for_access_token(auth_user: schemas.UserAuth, db: Session = Depends(get_db)):
+async def login_for_access_token(auth_user: schemas.UserAuth, db: Session = Depends(get_db)):
     user = crud.authenticate_user(db, auth_user.username, auth_user.password)
     if not user:
         raise HTTPException(

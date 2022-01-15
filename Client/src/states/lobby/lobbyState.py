@@ -4,11 +4,12 @@ from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
 from src.core.util.utilis import lerp, start_delayed
-from src.core.util.localauth import LocalAuth, AuthStatus
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
 from src.states.lobby.lobbyActivity import LobbyActivity, LobbyActivityState
 from src.networking.serverAPI.user import User, Guest
 from datetime import datetime
+from src.threads.wsglobalthread import WSGlobalThread
+
 
 class UIAnimState(Enum):
      Temp = 1
@@ -22,6 +23,7 @@ class LobbyState(State):
         self._init_widgets()
         self._init_msg_box()
         self._init_user()
+        self._init_websocket_connection()
         self.bInputEnabled = True
         self.bLogoAnimEnabled = True
         self.bLogoAnimGoingDown = True
@@ -37,6 +39,8 @@ class LobbyState(State):
         self.widget_manager.get_widget("UsernameLabel").set_text(User.me.username)
         self.widget_manager.get_widget("WinRateLabel").set_text("0/0")
 
+    def _init_websocket_connection(self):
+        WSGlobalThread.init()
 
     def _init_resources(self):
         textures_to_init={

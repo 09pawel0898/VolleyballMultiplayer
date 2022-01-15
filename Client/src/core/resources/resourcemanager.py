@@ -1,4 +1,5 @@
 from typing import TypeVar, Generic
+
 ResType = TypeVar('ResType')
 
 class ResourceManager(Generic[ResType]):
