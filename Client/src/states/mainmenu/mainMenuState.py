@@ -27,6 +27,7 @@ class MainMenuState(State):
         self.bInputEnabled = False
         self.bLogoAnimEnabled = False
         self.bLogoAnimGoingDown = True
+
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.LoginPanelSlideIn
         self.beforeMsgAnimState = self.UIAnimState
@@ -41,7 +42,7 @@ class MainMenuState(State):
         User.me.activity = MainMenuActivity()
         User.me.state = StateID.MainMenu
         User.me.activity.set_state(MainMenuActivityState.Idle)
-        self._debug()
+        #self._debug()
 
     def _init_resources(self):
         textures_to_init={

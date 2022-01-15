@@ -77,10 +77,9 @@ class ServerAPI:
     @staticmethod
     def try_authenticate_user(user: AuthUser):
         try:
-            response = requests.post(REMOTE+"/auth/token", data=user.json())
+            response = requests.post(REMOTE+"/auth/login", data=user.json())
             if response.status_code == 202:
                 token = response.json()["access_token"]
-                #print(user.username,token)
                 User.me = SignedUsed(User.me,user.username,token)
             return Response(ServerAPI._decode(response.status_code),response.json())
         except requests.ConnectionError:
