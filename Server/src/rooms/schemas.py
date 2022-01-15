@@ -6,3 +6,4 @@ class CreateRoom(BaseModel):
 
 class EnterRoom(BaseModel):
     rival_username: str
+    hash: str

@@ -1,25 +1,10 @@
 import requests
-from pydantic import BaseModel
 from enum import Enum
 from typing import Optional
 from src.networking.serverAPI.user import User, SignedUsed
-
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from .schemas import *
 
 REMOTE = "http://localhost:8000"
-
-class NewUser(BaseModel):
-    username: str
-    password: str
-    email: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class AuthUser(BaseModel):
-    username: str
-    password: str
 
 class ResponseStatus(Enum):
     Test = 1

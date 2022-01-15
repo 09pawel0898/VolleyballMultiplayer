@@ -6,23 +6,26 @@ from queue import Queue
 from src.networking.serverAPI.serverapi import *
 import websockets
 
-class WSGlobalThread:
+class WebsocketThread:
     _thread : threading.Thread
     _bRunning = False
 
-    # GlobalRequest queue
+    #"ws://localhost:8000/ws/"
+    _remote = ""
+    _roomHash = ""
+
+    # RoomRequest queue
     _pendingQueue = Queue()
 
-    # GlobalResponse queue
+    # RoomResponse queue
     _responseQueue = Queue()
 
 
     @staticmethod
     async def main_loop():
-        client_id = 1
-        url = "ws://localhost:8000/ws/" + client_id.__str__()
+        url = WebsocketThread._remote + WebsocketThread._roomHash
         global_websocket = await websockets.connect(url)
-        while WSGlobalThread._bRunning:
+        while WebsocketThread._bRunning:
             await asyncio.sleep(1)
             #await global_websocket.send("Hello")
             msg = await global_websocket.recv()
@@ -36,7 +39,7 @@ class WSGlobalThread:
     def run():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(WSGlobalThread.main_loop())
+        loop.run_until_complete(WebsocketThread.main_loop())
         loop.close()
 
     @staticmethod
@@ -59,12 +62,12 @@ class WSGlobalThread:
         #     ApiReqThread._responseQueue.put(ApiResponse(request, response))
 
     @staticmethod
-    async def new_request(request: ApiRequest) -> None:
+    async def send() -> None:
         pass
         #ApiReqThread._pendingQueue.put(request)
 
     @staticmethod
-    def try_get_response() -> ApiResponse:
+    def receive() -> None:
         pass
         # try:
         #     response = ApiReqThread._responseQueue.get(block=False)
@@ -73,10 +76,16 @@ class WSGlobalThread:
         # return response
 
     @staticmethod
-    def init() -> None:
-        WSGlobalThread._bRunning = True
-        WSGlobalThread._thread = threading.Thread(target=WSGlobalThread.run,
-                                                  args=())
-        WSGlobalThread._thread.start()
+    def connect(room_hash: str) -> None:
+        WebsocketThread._remote = "ws" + REMOTE[4:]
+        WebsocketThread._roomHash = room_hash
 
+        WebsocketThread._bRunning = True
+        WebsocketThread._thread = threading.Thread(target=WebsocketThread.run,
+                                                   args=())
+        WebsocketThread._thread.start()
+
+    @staticmethod
+    def stop():
+        WebsocketThread._bRunning = False
 

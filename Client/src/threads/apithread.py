@@ -3,6 +3,7 @@ import threading
 import time
 from queue import Queue
 from src.networking.serverAPI.serverapi import *
+from ..networking.serverAPI import serverapi
 
 class ApiReqThread:
     _thread : threading.Thread
@@ -51,7 +52,8 @@ class ApiReqThread:
         return response
 
     @staticmethod
-    def init() -> None:
+    def init(remote: str) -> None:
+        serverapi.REMOTE = remote
         ApiReqThread._bRunning = True
         ApiReqThread._thread = threading.Thread(target=ApiReqThread.run,
                                                args=())

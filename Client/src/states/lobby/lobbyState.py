@@ -8,7 +8,7 @@ from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
 from src.states.lobby.lobbyActivity import LobbyActivity, LobbyActivityState
 from src.networking.serverAPI.user import User, Guest
 from datetime import datetime
-from src.threads.wsglobalthread import WSGlobalThread
+from src.threads.websocketthread import WebsocketThread
 
 
 class UIAnimState(Enum):
@@ -23,17 +23,12 @@ class LobbyState(State):
         self._init_widgets()
         self._init_msg_box()
         self._init_user()
-        self._init_websocket_connection()
         self.bInputEnabled = True
         self.bLogoAnimEnabled = True
         self.bLogoAnimGoingDown = True
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.Temp
         self.beforeMsgAnimState = self.UIAnimState
-        self.get_me()
-
-    def get_me(self):
-        ApiReqThread.new_request(ApiRequest(PendingRequest.GET_Me))
 
     def _init_user(self):
         User.me.activity = LobbyActivity()
@@ -41,9 +36,6 @@ class LobbyState(State):
 
         self.widget_manager.get_widget("UsernameLabel").set_text(User.me.username)
         self.widget_manager.get_widget("WinRateLabel").set_text("0/0")
-
-    def _init_websocket_connection(self):
-        WSGlobalThread.init()
 
     def _init_resources(self):
         textures_to_init={
