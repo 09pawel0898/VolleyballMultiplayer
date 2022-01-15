@@ -33,7 +33,7 @@ class MainMenuState(State):
         self.beforeMsgAnimState = self.UIAnimState
 
     #immediate login temporary user
-    def _debug(self):
+    def _login_temp_user_debug(self):
         User.me.activity.set_state(MainMenuActivityState.WaitingForSignInResponse)
         ApiReqThread.new_request(ApiRequest(PendingRequest.POST_SigninUser, data=("admin123", "admin123")))
         self.bInputEnabled = False
@@ -42,7 +42,7 @@ class MainMenuState(State):
         User.me.activity = MainMenuActivity()
         User.me.state = StateID.MainMenu
         User.me.activity.set_state(MainMenuActivityState.Idle)
-        self._debug()
+        #self._login_temp_user_debug()
 
     def _init_resources(self):
         textures_to_init={

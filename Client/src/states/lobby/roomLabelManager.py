@@ -12,6 +12,7 @@ class RoomLabelManager:
         self._texture_empty = texture_empty
         self._room_labels : List[RoomLabel] = []
         self._top_left = top_left
+        self._initial_top_left = top_left
         self._active_label = None
 
     def _add_label(self, label : RoomLabel):
@@ -48,7 +49,8 @@ class RoomLabelManager:
             label.update(dt)
 
     def refresh(self):
-        self.clear()
+        self._room_labels.clear()
+        self._top_left = copy.deepcopy(self._initial_top_left)
         rooms : List[RoomDisplayed] = RoomHolder.rooms
 
         for room in rooms:

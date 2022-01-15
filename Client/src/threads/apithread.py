@@ -3,6 +3,7 @@ import threading
 import time
 from queue import Queue
 from src.networking.serverAPI.serverapi import *
+from src.networking.serverRoom.schemas import *
 from ..networking.serverAPI import serverapi
 
 class ApiReqThread:
@@ -30,6 +31,13 @@ class ApiReqThread:
                 response = ServerAPI.try_get_me()
             case PendingRequest.GET_AllRooms:
                 response = ServerAPI.try_get_all_rooms()
+            case PendingRequest.POST_CreateRoom:
+                response = ServerAPI.try_create_room(
+                    NewRoom(
+                        token=Token(access_token=User.me.token,token_type="bearer"),
+                        room=RoomCreate(host_username=User.me.username)
+                    )
+                )
             case PendingRequest.POST_RegisterUser:
                 response = ServerAPI.try_register_user(
                     NewUser(username=request.data[0],password=request.data[1],email=request.data[2]))

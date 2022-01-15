@@ -106,9 +106,9 @@ class TextBox(Widget):
         if self.border is not False:
             pygame.draw.rect(self.image, (0, 0, 0), [0, 0, self.width - 1, self.boxSize - 1], 2)
         if not initial_text:
-            self.image.blit(self.font.draw(self.textDisplayed, True, self.fontColour), [10, 5])
+            self.image.blit(self.font.render(self.textDisplayed, True, self.fontColour), [10, 5])
         else:
-            self.image.blit(self.font.draw(self.initialText, True, self.initialColour), [10, 5])
+            self.image.blit(self.font.render(self.initialText, True, self.initialColour), [10, 5])
 
     def _try_add_character(self, key_event : pygame.event.Event):
         pass

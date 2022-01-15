@@ -30,8 +30,7 @@ class LobbyState(State):
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.Temp
         self.beforeMsgAnimState = self.UIAnimState
-        #temp
-        self._refresh_room_labels()
+        self._refresh_room_labels_onclick()
 
     def _init_user(self):
         User.me.activity = LobbyActivity()
@@ -89,13 +88,21 @@ class LobbyState(State):
             Label(Vec2(771,27), "",50,font="Agency FB")
         )
 
-        self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user)
+        self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)
+        self.widget_manager.get_widget("ButtonCreate").set_callback(self._create_room_onclick)
+        self.widget_manager.get_widget("ButtonJoin").set_callback(self._join_room_onclick)
 
 
-    def _refresh_room_labels(self):
+    def _refresh_room_labels_onclick(self):
         ApiReqThread.new_request(ApiRequest(PendingRequest.GET_AllRooms))
 
-    def _logout_user(self):
+    def _create_room_onclick(self):
+        ApiReqThread.new_request(ApiRequest(PendingRequest.POST_CreateRoom))
+
+    def _join_room_onclick(self):
+        pass
+
+    def _logout_user_onclick(self):
         User.me = Guest()
         self.state_manager.pop_state()
 

@@ -4,6 +4,7 @@ from typing import Optional
 from src.networking.serverAPI.user import User, SignedUsed
 from .schemas import *
 from ..serverRoom.room import *
+from ..serverRoom.schemas import NewRoom
 
 REMOTE = "http://localhost:8000"
 
@@ -15,7 +16,8 @@ class ResponseStatus(Enum):
     ConnectionError = 5
     TimeoutError = 6
     SignedIn = 7
-    BadAuth = 8
+    BadAuth = 8,
+    Forbidden= 9
 
 class PendingRequest(Enum):
     GET_Temp = 1
@@ -23,6 +25,9 @@ class PendingRequest(Enum):
     GET_AllRooms = 3
     POST_RegisterUser = 4
     POST_SigninUser = 5
+    POST_CreateRoom = 6
+    DELETE_DeleteRoom = 7
+
 
 
 # contains ResponseStatus and data
@@ -59,13 +64,21 @@ class ServerAPI:
         201: ResponseStatus.SignedUp,
         202: ResponseStatus.SignedIn,
         226: ResponseStatus.UsernameTaken,
-        401: ResponseStatus.BadAuth
+        401: ResponseStatus.BadAuth,
+        403: ResponseStatus.Forbidden
     }
 
-    #@staticmethod
-    #def temp() -> Response:
-    #    response = requests.get(REMOTE + "/temp/")
-    #    return Response(ServerAPI._decode(response.status_code),response.json())
+    @staticmethod
+    def try_create_room(new_room: NewRoom):
+        try:
+            response = requests.post(REMOTE + "/rooms/create/", data=new_room.json())
+            if response.status_code == 200:
+                print(response.json())
+            return Response(ServerAPI._decode(response.status_code), response.json())
+        except requests.ConnectionError:
+            return Response(ResponseStatus.ConnectionError)
+        except requests.Timeout:
+            return Response(ResponseStatus.TimeoutError)
 
     @staticmethod
     def try_get_me():
@@ -83,6 +96,7 @@ class ServerAPI:
     @staticmethod
     def try_get_all_rooms():
         try:
+            RoomHolder.clear()
             response = requests.get(REMOTE+"/rooms/all")
             if response.status_code == 200:
                 for room in response.json():
