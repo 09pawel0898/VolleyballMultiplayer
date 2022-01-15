@@ -67,7 +67,7 @@ class Button(Widget):
                 self.set_position(lerp(self.pos.x, self._initial_pos.x, dt*0.015), self.pos.y)
             self.bCovered = False
 
-    def render(self):
+    def draw(self, window: pygame.Surface):
         pass
 
     #def _set_scaled_or_not(self, scaled: bool):

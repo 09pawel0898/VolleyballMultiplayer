@@ -22,6 +22,18 @@ async def create_room(token: Token, room: schemas.CreateRoom, response: Response
         response.status_code = status.HTTP_403_FORBIDDEN
         return {"data" : f"Error when creating a room"}
 
+@router.delete("/rooms/create/")
+async def delete_room(token: Token, room: schemas.DeleteRoom, response: Response, db: Session = Depends(get_db)):
+    user = get_current_user(token=token.access_token,db=db)
+    if not user:
+        raise credentials_exception
+    result = crud.delete_room(db=db, room=room)
+    if result:
+        return {"data" : f"{room.host_username}'s room succesfully deleted"}
+    else:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return {"data" : f"Cant destroy this room"}
+
 @router.get("/rooms/all/")
 async def get_all_rooms(db: Session = Depends(get_db)):
     return db.query(models.Rooms).all()

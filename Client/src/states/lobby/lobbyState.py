@@ -23,6 +23,7 @@ class LobbyState(State):
         self._init_widgets()
         self._init_msg_box()
         self._init_user()
+        self._init_room_label_manager()
         self.bInputEnabled = True
         self.bLogoAnimEnabled = True
         self.bLogoAnimGoingDown = True
@@ -37,6 +38,9 @@ class LobbyState(State):
         self.widget_manager.get_widget("UsernameLabel").set_text(User.me.username)
         self.widget_manager.get_widget("WinRateLabel").set_text("0/0")
 
+    def _init_room_label_manager(self):
+        pass
+    
     def _init_resources(self):
         textures_to_init={
             #placeholder --->

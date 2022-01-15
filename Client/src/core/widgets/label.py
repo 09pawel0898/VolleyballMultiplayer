@@ -25,7 +25,7 @@ class Label(Widget):
     def update(self,dt):
         pass
 
-    def render(self):
+    def draw(self, window: pygame.Surface):
         pass
 
     def set_text(self, new_text: str):

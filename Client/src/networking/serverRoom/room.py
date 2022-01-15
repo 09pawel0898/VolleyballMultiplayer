@@ -1,10 +1,13 @@
 
 
 class Room:
-    pass
+    def __init__(self, host: str):
+        self.host_username = host
+        self.people = 0
 
 class RoomCreate(Room):
-    def __init__(self):
+    def __init__(self, host: str):
+        super().__init__(host)
         pass
 
     def create(self):
