@@ -68,7 +68,7 @@ class Button(Widget):
             self.bCovered = False
 
     def draw(self, window: pygame.Surface):
-        pass
+        window.blit(self.image, self.rect)
 
     #def _set_scaled_or_not(self, scaled: bool):
     #    if scaled:

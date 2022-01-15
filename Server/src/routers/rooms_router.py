@@ -22,7 +22,7 @@ async def create_room(token: Token, room: schemas.CreateRoom, response: Response
         response.status_code = status.HTTP_403_FORBIDDEN
         return {"data" : f"Error when creating a room"}
 
-@router.delete("/rooms/create/")
+@router.delete("/rooms/delete/")
 async def delete_room(token: Token, room: schemas.DeleteRoom, response: Response, db: Session = Depends(get_db)):
     user = get_current_user(token=token.access_token,db=db)
     if not user:

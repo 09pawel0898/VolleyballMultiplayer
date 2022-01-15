@@ -12,19 +12,39 @@ class RoomLabel(Button):
         self.people = people
         self.full = full
         self._init_labels()
+        self.set_active(False)
 
     def set_position(self,x: float, y: float) -> None:
         super().set_position(x,y)
+        self.host_label.set_position(x + self.host_label_offset.x,y + self.host_label_offset.y)
+        self.people_label.set_position(x + self.people_label_offset.x,y + self.people_label_offset.y)
+        self.pos = Vec2(x,y)
         #set text label pos
 
     def _init_labels(self) -> None:
-        self.host_label = Label(Vec2(self.pos.x + 20, self.pos.y + 20), self.host, 33)
+        self.host_label_offset = Vec2(140,6)
+        self.people_label_offset = Vec2(330,6)
+
+        self.host_label = Label(Vec2(0,0), self.host, 27)
         if self.full:
-            self.people_label = Label(Vec2(self.pos.x + 30, self.pos.y + 30), "1/1", 33)
-            #init aproppriate texture
+            self.people_label = Label(Vec2(0,0), "1/1", 27)
         else:
-            self.people_label = Label(Vec2(self.pos.x + 30, self.pos.y + 30), "0/1", 33)
-            # init apropriate texture
+            self.people_label = Label(Vec2(0,0), "0/1", 27)
+
+    def set_active(self, active: bool):
+        if active:
+            self.image.set_alpha(255)
+            self.host_label.image.set_alpha(255)
+            self.people_label.image.set_alpha(255)
+        else:
+            self.image.set_alpha(190)
+            self.host_label.image.set_alpha(190)
+            self.people_label.image.set_alpha(190)
+
+    def on_click(self):
+        self.set_active(True)
 
     def draw(self, window : pygame.Surface) -> None:
         super().draw(window)
+        window.blit(self.host_label.image,self.host_label.rect)
+        window.blit(self.people_label.image,self.people_label.rect)

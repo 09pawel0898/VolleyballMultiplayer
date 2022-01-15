@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Optional
 from src.networking.serverAPI.user import User, SignedUsed
 from .schemas import *
+from ..serverRoom.room import *
 
 REMOTE = "http://localhost:8000"
 
@@ -19,8 +20,10 @@ class ResponseStatus(Enum):
 class PendingRequest(Enum):
     GET_Temp = 1
     GET_Me = 2
-    POST_RegisterUser = 3
-    POST_SigninUser = 4
+    GET_AllRooms = 3
+    POST_RegisterUser = 4
+    POST_SigninUser = 5
+
 
 # contains ResponseStatus and data
 class Response:
@@ -77,6 +80,20 @@ class ServerAPI:
         except requests.Timeout:
             return Response(ResponseStatus.TimeoutError)
 
+    @staticmethod
+    def try_get_all_rooms():
+        try:
+            response = requests.get(REMOTE+"/rooms/all")
+            if response.status_code == 200:
+                for room in response.json():
+                    room_to_append = RoomDisplayed(room["host"],room["hash"], room["players"])
+                    RoomHolder.add_room(room_to_append)
+
+            return Response(ServerAPI._decode(response.status_code),response.json())
+        except requests.ConnectionError:
+            return Response(ResponseStatus.ConnectionError)
+        except requests.Timeout:
+            return Response(ResponseStatus.TimeoutError)
 
     @staticmethod
     def try_authenticate_user(user: AuthUser):

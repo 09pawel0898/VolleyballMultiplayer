@@ -1,6 +1,6 @@
 from src.networking.serverAPI.useractivity import *
 from src.networking.serverAPI.user import User
-from src.networking.serverAPI.serverapi import ResponseStatus
+from src.networking.serverAPI.serverapi import ResponseStatus,PendingRequest
 from src.core.defines import DEBUG
 
 from enum import Enum
@@ -17,7 +17,16 @@ class LobbyActivity(UserActivity):
         if response is not None:
             if DEBUG:
                 print(response)
-            # if self._activity_state == MainMenuActivityState.WaitingForSignUpResponse:
+            if response.request.type == PendingRequest.GET_AllRooms:
+                if response.response.status == ResponseStatus.Ok:
+                    state.room_label_manager.refresh()
+
+            #    if response.response.status == ResponseStatus.SignedUp:
+            #         state.show_msg_box("User successfully registered.")
+            #         self._activity_state = MainMenuActivityState.Idle
+            #         return True
+
+            #if self._activity_state == MainMenuActivityState.WaitingForSignUpResponse:
             #     if response.response.status == ResponseStatus.SignedUp:
             #         state.show_msg_box("User successfully registered.")
             #         self._activity_state = MainMenuActivityState.Idle

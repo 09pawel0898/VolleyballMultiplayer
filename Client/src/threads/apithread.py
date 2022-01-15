@@ -28,6 +28,8 @@ class ApiReqThread:
         match request.type:
             case PendingRequest.GET_Me:
                 response = ServerAPI.try_get_me()
+            case PendingRequest.GET_AllRooms:
+                response = ServerAPI.try_get_all_rooms()
             case PendingRequest.POST_RegisterUser:
                 response = ServerAPI.try_register_user(
                     NewUser(username=request.data[0],password=request.data[1],email=request.data[2]))

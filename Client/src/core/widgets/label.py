@@ -26,7 +26,11 @@ class Label(Widget):
         pass
 
     def draw(self, window: pygame.Surface):
-        pass
+        window.blit(self.image,self.rect)
+
+    def set_position(self,x: float, y: float) -> None:
+        self.pos.x = self.rect.left = x
+        self.pos.y = self.rect.top = y
 
     def set_text(self, new_text: str):
         self._text = new_text
