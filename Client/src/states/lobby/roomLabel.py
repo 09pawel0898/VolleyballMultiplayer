@@ -12,7 +12,6 @@ class RoomLabel(Button):
         self.people = people
         self.full = full
         self._init_labels()
-        self.set_active(False)
 
     def set_position(self,x: float, y: float) -> None:
         super().set_position(x,y)
@@ -37,12 +36,9 @@ class RoomLabel(Button):
             self.host_label.image.set_alpha(255)
             self.people_label.image.set_alpha(255)
         else:
-            self.image.set_alpha(190)
-            self.host_label.image.set_alpha(190)
-            self.people_label.image.set_alpha(190)
-
-    def on_click(self):
-        self.set_active(True)
+            self.image.set_alpha(255)
+            self.host_label.image.set_alpha(140)
+            self.people_label.image.set_alpha(140)
 
     def draw(self, window : pygame.Surface) -> None:
         super().draw(window)

@@ -3,7 +3,7 @@ from src.core.util.vector import Vec2
 from src.core.util.utilis import lerp
 from src.core.resources.texture import Texture
 from src.core.resources.sprite import Origin
-
+from typing import Optional
 from typing import Callable
 from enum import Enum
 import pygame
@@ -37,10 +37,13 @@ class Button(Widget):
         else:
             return False
 
-    def check_for_onclick(self):
+    def check_for_onclick(self, params : Optional = None):
         if self.bCovered:
             if self._callback is not None:
-                self._callback()
+                if params is None:
+                    self._callback()
+                else:
+                    self._callback(params)
 
     def set_callback(self, func: Callable):
         self._callback = func
