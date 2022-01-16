@@ -23,3 +23,5 @@ class TextureID(Enum):
     ButtonLogout = 20
     RoomLabelFull = 21
     RoomLabelEmpty = 22
+    ButtonRefresh = 23
+    ButtonCancel = 24

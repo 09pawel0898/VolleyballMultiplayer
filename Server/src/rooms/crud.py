@@ -30,3 +30,11 @@ def delete_room(db: Session, room: schemas.DeleteRoom):
         raise no_such_room_exception
     return room
 
+def _delete_room_by_hash(db: Session, hash: str):
+    try:
+        room = db.query(models.Rooms).filter(models.Rooms.hash == hash).first()
+        db.delete(room)
+        db.commit()
+    except:
+        raise no_such_room_exception
+    return room

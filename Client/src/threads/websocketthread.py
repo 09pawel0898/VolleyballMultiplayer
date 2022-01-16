@@ -10,7 +10,6 @@ class WebsocketThread:
     _thread : threading.Thread
     _bRunning = False
 
-    #"ws://localhost:8000/ws/"
     _remote = ""
     _roomHash = ""
 
@@ -24,6 +23,7 @@ class WebsocketThread:
     @staticmethod
     async def main_loop():
         url = WebsocketThread._remote + WebsocketThread._roomHash
+        print(url)
         global_websocket = await websockets.connect(url)
         while WebsocketThread._bRunning:
             await asyncio.sleep(1)
@@ -62,12 +62,12 @@ class WebsocketThread:
         #     ApiReqThread._responseQueue.put(ApiResponse(request, response))
 
     @staticmethod
-    async def send() -> None:
+    async def send(data) -> None:
         pass
-        #ApiReqThread._pendingQueue.put(request)
+        #WebsocketThread._pendingQueue.put(request)
 
     @staticmethod
-    def receive() -> None:
+    def try_receive() -> None:
         pass
         # try:
         #     response = ApiReqThread._responseQueue.get(block=False)
@@ -77,7 +77,7 @@ class WebsocketThread:
 
     @staticmethod
     def connect(room_hash: str) -> None:
-        WebsocketThread._remote = "ws" + REMOTE[4:]
+        WebsocketThread._remote = "ws" + REMOTE[4:] + "/"
         WebsocketThread._roomHash = room_hash
 
         WebsocketThread._bRunning = True
@@ -86,6 +86,6 @@ class WebsocketThread:
         WebsocketThread._thread.start()
 
     @staticmethod
-    def stop():
+    def disconnect():
         WebsocketThread._bRunning = False
 

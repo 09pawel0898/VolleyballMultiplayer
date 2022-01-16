@@ -34,6 +34,18 @@ async def delete_room(token: Token, room: schemas.DeleteRoom, response: Response
         response.status_code = status.HTTP_403_FORBIDDEN
         return {"data" : f"Cant destroy this room"}
 
+#temporary
+@router.delete("/rooms/delete-all")
+async def delete_all(db: Session = Depends(get_db)):
+    try:
+        db.query(models.Rooms).delete()
+        db.commit()
+        return {"data": "All room succesfully deleted"}
+    except:
+        db.rollback()
+        return {"data" : "Error uccured when deleting the rooms"}
+
+
 @router.get("/rooms/all/")
 async def get_all_rooms(db: Session = Depends(get_db)):
     return db.query(models.Rooms).all()

@@ -35,7 +35,7 @@ class MainMenuState(State):
     #immediate login temporary user
     def _login_temp_user_debug(self):
         User.me.activity.set_state(MainMenuActivityState.WaitingForSignInResponse)
-        ApiReqThread.new_request(ApiRequest(PendingRequest.POST_SigninUser, data=("admin123", "admin123")))
+        ApiReqThread.new_request(ApiRequest(PendingRequest.POST_SigninUser, data=("pawel123", "pawel123")))
         self.bInputEnabled = False
 
     def _init_user(self):
@@ -435,4 +435,5 @@ class MainMenuState(State):
 
         User.me.activity.handle_response(self,ApiReqThread.try_get_response())
 
-
+    def _shutdown(self) -> None:
+        pass

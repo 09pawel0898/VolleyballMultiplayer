@@ -60,7 +60,7 @@ class RoomLabelManager:
             else:
                 texture = self._texture_full
                 full = True
-            self._add_label(RoomLabel(texture,room.host_username, room.people, full))
+            self._add_label(RoomLabel(texture,room.host_username, room.people, full, room.hash))
 
-    def get_active_label(self):
+    def get_active_label(self) -> RoomLabel:
         return self._active_label

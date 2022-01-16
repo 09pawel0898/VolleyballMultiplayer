@@ -61,3 +61,8 @@ class StateManager:
 
     def is_empty(self) -> bool:
         return self._states.is_empty()
+
+    def shutdown(self) -> None:
+        while not self._states.is_empty():
+            self._states.top()._shutdown()
+            self._states.pop()

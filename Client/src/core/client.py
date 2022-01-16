@@ -4,6 +4,8 @@ from src.states.gameplay.gameplayState import GameplayState
 from src.states.lobby.lobbyState import LobbyState
 from src.core.resources.texture import *
 
+from src.threads import apithread, websocketthread
+
 class Client:
     def __init__(self, viewport_x: int, viewport_y: int) -> None:
         self._window = pygame.display.set_mode([viewport_x, viewport_y])
@@ -44,6 +46,10 @@ class Client:
             if event.type == pygame.QUIT:
                 self._running = False
 
+    def _shutdown(self):
+        self._state_manager.shutdown()
+        websocketthread.WebsocketThread.disconnect()
+        apithread.ApiReqThread.stop()
 
     def run(self) -> None:
         self._running = True
@@ -56,4 +62,5 @@ class Client:
             self._process_events()
             self._update(self._dt)
             self._render()
+        self._shutdown()
         pygame.quit()

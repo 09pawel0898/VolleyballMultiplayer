@@ -45,3 +45,7 @@ class State(ABC):
     @abstractmethod
     def _on_awake(self) -> None:
         pass
+
+    @abstractmethod
+    def _shutdown(self) -> None:
+        pass

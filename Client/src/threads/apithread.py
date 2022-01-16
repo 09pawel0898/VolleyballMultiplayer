@@ -69,4 +69,7 @@ class ApiReqThread:
                                                args=())
         ApiReqThread._thread.start()
 
+    @staticmethod
+    def stop() -> None:
+        ApiReqThread._bRunning = False
 

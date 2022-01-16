@@ -12,9 +12,8 @@ from src.threads.websocketthread import WebsocketThread
 from .roomLabelManager import *
 
 class UIAnimState(Enum):
-     Temp = 1
+     Default = 1
      MessageBoxShowed = 2
-
 
 class LobbyState(State):
     def __init__(self, context, state_manager):
@@ -28,9 +27,9 @@ class LobbyState(State):
         self.bLogoAnimEnabled = True
         self.bLogoAnimGoingDown = True
         self.bMsgPanelActive = False
-        self.UIAnimState = UIAnimState.Temp
+        self.UIAnimState = UIAnimState.Default
         self.beforeMsgAnimState = self.UIAnimState
-        self._refresh_room_labels_onclick()
+        self._refresh_onclick()
 
     def _init_user(self):
         User.me.activity = LobbyActivity()
@@ -50,10 +49,12 @@ class LobbyState(State):
             TextureID.ButtonCreate: "res/img/button_create.png",
             TextureID.ButtonJoin: "res/img/button_join.png",
             TextureID.ButtonLeaderboard: "res/img/button_leaderboard.png",
+            TextureID.ButtonRefresh: "res/img/button_refresh.png",
             TextureID.ButtonLogout: "res/img/button_logout.png",
             TextureID.LobbyUserPanel : "res/img/lobby.png",
             TextureID.RoomLabelFull : "res/img/match_label_red.png",
-            TextureID.RoomLabelEmpty : "res/img/match_label_green.png"
+            TextureID.RoomLabelEmpty : "res/img/match_label_green.png",
+            TextureID.ButtonCancel : "res/img/button_cancel.png"
         }
         for key in textures_to_init:
             self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
@@ -64,17 +65,20 @@ class LobbyState(State):
         #buttons
         self.widget_manager.init_widget(
             "ButtonCreate",
-            Button(Vec2(66, 130), texture_manager.get_resource(TextureID.ButtonCreate), ButtonBehaviour.SlideRight))
+            Button(Vec2(66, 120), texture_manager.get_resource(TextureID.ButtonCreate), ButtonBehaviour.SlideRight))
         self.widget_manager.init_widget(
             "ButtonJoin",
-            Button(Vec2(66, 230), texture_manager.get_resource(TextureID.ButtonJoin), ButtonBehaviour.SlideRight))
+            Button(Vec2(66, 200), texture_manager.get_resource(TextureID.ButtonJoin), ButtonBehaviour.SlideRight))
         self.widget_manager.init_widget(
             "ButtonLeaderboard",
-            Button(Vec2(66, 330), texture_manager.get_resource(TextureID.ButtonLeaderboard),
-                   ButtonBehaviour.SlideRight))
+            Button(Vec2(66, 280), texture_manager.get_resource(TextureID.ButtonLeaderboard),
+            ButtonBehaviour.SlideRight))
         self.widget_manager.init_widget(
             "ButtonLogout",
-            Button(Vec2(66, 430), texture_manager.get_resource(TextureID.ButtonLogout), ButtonBehaviour.SlideRight))
+            Button(Vec2(66, 440), texture_manager.get_resource(TextureID.ButtonLogout), ButtonBehaviour.SlideRight))
+        self.widget_manager.init_widget(
+            "ButtonRefresh",
+            Button(Vec2(66, 360), texture_manager.get_resource(TextureID.ButtonRefresh), ButtonBehaviour.SlideRight))
 
         #labels
         self.widget_manager.init_widget(
@@ -90,20 +94,21 @@ class LobbyState(State):
 
         self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)
         self.widget_manager.get_widget("ButtonCreate").set_callback(self._create_room_onclick)
+        self.widget_manager.get_widget("ButtonRefresh").set_callback(self._refresh_onclick)
         self.widget_manager.get_widget("ButtonJoin").set_callback(self._join_room_onclick)
-
-
-    def _refresh_room_labels_onclick(self):
-        ApiReqThread.new_request(ApiRequest(PendingRequest.GET_AllRooms))
 
     def _create_room_onclick(self):
         ApiReqThread.new_request(ApiRequest(PendingRequest.POST_CreateRoom))
 
     def _join_room_onclick(self):
-        pass
+        WebsocketThread.connect(self.room_label_manager.get_active_label().hash)
+
+    def _refresh_onclick(self):
+        ApiReqThread.new_request(ApiRequest(PendingRequest.GET_AllRooms))
 
     def _logout_user_onclick(self):
         User.me = Guest()
+        self._shutdown()
         self.state_manager.pop_state()
 
     def _init_msg_box(self):
@@ -113,11 +118,14 @@ class LobbyState(State):
                                origin=Origin.TOP_LEFT)
         self.msgLabel = Label(Vec2(300,188),"Message",30,font="Agency FB")
         self.msgButton = Button(Vec2(449,253),texture_manager.get_resource(TextureID.ButtonOk))
+        self.msgButton.set_position(449, 253)
         self.msgButton.set_callback(self._hide_msg_box)
         self.bMsgPanelActive = False
 
 
-    def show_msg_box(self, message):
+    def show_msg_box(self, message, button_texture_id: TextureID, callback):
+        self.msgButton.image = self.state_manager.context.texture_manager.get_resource(button_texture_id).image
+        self.msgButton.set_callback(callback)
         self.beforeMsgAnimState = self.UIAnimState
         self.UIAnimState = UIAnimState.MessageBoxShowed
         self.bInputEnabled = True
@@ -128,6 +136,9 @@ class LobbyState(State):
         self.UIAnimState = self.beforeMsgAnimState
         self.bInputEnabled = True
         self.bMsgPanelActive = False
+
+    def _room_shutdown(self):
+        WebsocketThread.disconnect()
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -175,13 +186,19 @@ class LobbyState(State):
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         if self.bInputEnabled:
-            self.room_label_manager.handle_events(events)
+            if not self.UIAnimState == UIAnimState.MessageBoxShowed:
+                self.room_label_manager.handle_events(events)
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.UIAnimState == UIAnimState.MessageBoxShowed:
+                        self.msgButton.check_for_onclick()
+                    else:
                         self.widget_manager.get_widget("ButtonLogout").check_for_onclick()
                         self.widget_manager.get_widget("ButtonCreate").check_for_onclick()
+                        self.widget_manager.get_widget("ButtonRefresh").check_for_onclick()
                         self.widget_manager.get_widget("ButtonJoin").check_for_onclick()
                         self.widget_manager.get_widget("ButtonLeaderboard").check_for_onclick()
+
 
     def _on_awake(self) -> None:
         pass
@@ -212,5 +229,8 @@ class LobbyState(State):
         now = datetime.now()
         current_time = now.strftime("%H:%M")
         self.widget_manager.get_widget("TimeLabel").set_text(current_time)
+
+    def _shutdown(self) -> None:
+        WebsocketThread.disconnect()
 
 

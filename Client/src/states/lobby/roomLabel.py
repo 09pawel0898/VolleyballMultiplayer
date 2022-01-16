@@ -6,11 +6,12 @@ from src.core.resources.texture import Texture
 from src.core.widgets.label import Label
 
 class RoomLabel(Button):
-    def __init__(self, texture: Texture, host: str, people: int, full: bool) -> None:
+    def __init__(self, texture: Texture, host: str, people: int, full: bool, hash: str) -> None:
         super().__init__(Vec2(-1000,-1000), texture, ButtonBehaviour.NoBehaviour)
         self.host = host
         self.people = people
         self.full = full
+        self.hash = hash
         self._init_labels()
 
     def set_position(self,x: float, y: float) -> None:
