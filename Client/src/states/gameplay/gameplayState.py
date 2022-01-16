@@ -22,4 +22,7 @@ class GameplayState(State):
     def _on_update(self, dt: float):
         pass
 
+    def _shutdown(self) -> None:
+        pass
+
 

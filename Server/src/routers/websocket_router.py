@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi import WebSocket, WebSocketDisconnect, status
 from sqlalchemy import update
-
+import json
 from ..websockets.globalconnectionmanager import GlobalConnectionManager
 from sqlalchemy.orm import Session
 from src.database import get_db
@@ -39,7 +39,14 @@ async def room_endpoint(websocket: WebSocket, room_hash: str, db: Session = Depe
         while True:
             data = await websocket.receive_text()
             if data is not None:
-                print(data)
+                d = json.loads(data)
+                print(d["body"])
+                if d["body"]["status"] == "Connected":
+                    global_connection_manager.get_room(room_hash).people+=1
+                    if global_connection_manager.get_room(room_hash).people == 2:
+                        await global_connection_manager.broadcast(room_hash, "GameStarted")
+
+
             await global_connection_manager.send_personal_message(room_hash, "Ga", websocket)
             #await global_connection_manager.broadcast(f"Client #{client_id} says: {data}")
     except WebSocketDisconnect:

@@ -85,7 +85,7 @@ class WebsocketThread:
         WebsocketThread._pendingQueue.put(package)
 
     @staticmethod
-    def try_receive() -> None:
+    def try_receive() -> str | None:
         try:
             response = WebsocketThread._responseQueue.get(block=False)
         except queue.Empty:

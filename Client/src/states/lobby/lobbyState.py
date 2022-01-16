@@ -237,6 +237,10 @@ class LobbyState(State):
         #handle api response if there is any
         User.me.activity.handle_response(self,ApiReqThread.try_get_response())
 
+        ws_response = WebsocketThread.try_receive()
+        if ws_response == "GameStarted":
+            self.state_manager.push_state("GameplayState")
+
         #update time widget
         now = datetime.now()
         current_time = now.strftime("%H:%M")
