@@ -99,9 +99,13 @@ class LobbyState(State):
 
     def _create_room_onclick(self):
         ApiReqThread.new_request(ApiRequest(PendingRequest.POST_CreateRoom))
+        self._refresh_onclick()
 
     def _join_room_onclick(self):
-        WebsocketThread.connect(self.room_label_manager.get_active_label().hash)
+        if self.room_label_manager.get_active_label() is not None:
+            self.show_msg_box("Connecting..", TextureID.ButtonCancel, self._cancel_connection)
+            WebsocketThread.connect(self.room_label_manager.get_active_label().hash)
+            self._activity_state = LobbyActivityState.WaitingForConnection
 
     def _refresh_onclick(self):
         ApiReqThread.new_request(ApiRequest(PendingRequest.GET_AllRooms))
@@ -137,8 +141,16 @@ class LobbyState(State):
         self.bInputEnabled = True
         self.bMsgPanelActive = False
 
+    def _cancel_connection(self):
+        self._activity_state = LobbyActivityState.Idle
+        self._refresh_onclick()
+        self._hide_msg_box()
+
     def _room_shutdown(self):
         WebsocketThread.disconnect()
+        self._refresh_onclick()
+        self._hide_msg_box()
+        self._activity_state = LobbyActivityState.Idle
 
     def _init_state_content(self):
         texture_manager = self.state_manager.context.texture_manager

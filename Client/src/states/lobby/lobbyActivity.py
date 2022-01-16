@@ -10,6 +10,7 @@ class LobbyActivityState(Enum):
     Idle = 1
     RoomCreated = 2
     WaitingInRoom = 3
+    WaitingForConnection = 4
 
 class LobbyActivity(UserActivity):
     def __init__(self):
@@ -29,9 +30,9 @@ class LobbyActivity(UserActivity):
                     room_hash = response.response.data["hash"]
                     #selected_room : RoomLabel = state.room_label_manager.get_active_label()
                     WebsocketThread.connect(room_hash)
-                    state.show_msg_box("Room created. Waiting..",TextureID.ButtonCancel, state._hide_msg_box)
+                    state.show_msg_box("Room created. Waiting..",TextureID.ButtonCancel, state._room_shutdown)
                 else:
-                    state.show_msg_box("Your room already exist.",TextureID.ButtonOk, state._room_shutdown)
+                    state.show_msg_box("Your room already exist.",TextureID.ButtonOk, state._hide_msg_box)
 
             #    if response.response.status == ResponseStatus.SignedUp:
             #         state.show_msg_box("User successfully registered.")

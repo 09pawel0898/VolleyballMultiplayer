@@ -31,6 +31,10 @@ class RoomLabelManager:
                 label.set_active(True)
                 self._active_label = label
 
+    def deactivate_labels(self):
+        for label in self._room_labels:
+                label.set_active(False)
+
     def clear(self):
         self._room_labels.clear()
 
@@ -54,13 +58,13 @@ class RoomLabelManager:
         rooms : List[RoomDisplayed] = RoomHolder.rooms
 
         for room in rooms:
-            if room.people == 0:
+            if room.players == 1:
                 texture = self._texture_empty
                 full = False
             else:
                 texture = self._texture_full
                 full = True
-            self._add_label(RoomLabel(texture,room.host_username, room.people, full, room.hash))
+            self._add_label(RoomLabel(texture,room.host_username, room.players, full, room.hash))
 
     def get_active_label(self) -> RoomLabel:
         return self._active_label

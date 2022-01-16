@@ -1,9 +1,10 @@
 from typing import List
 from fastapi import WebSocket
 
-class GlobalConnectionManager:
+class RoomConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
+        self.people = 0
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()

@@ -3,7 +3,6 @@ from typing import List
 class RoomDisplayed:
     def __init__(self, host: str, hash: str, players: int):
         self.host_username = host
-        self.people = 0
         self.hash = hash
         self.players = players
 
