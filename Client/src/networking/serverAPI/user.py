@@ -1,9 +1,5 @@
 from src.core.states.stateidentifiers import StateID
 from src.networking.serverAPI.useractivity import UserActivity
-from enum import Enum
-
-class UserLobbyActivity(Enum):
-    Idle = 1
 
 class BaseUser:
     def __init__(self) -> None:

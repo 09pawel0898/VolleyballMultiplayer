@@ -16,18 +16,3 @@ class RoomHolder:
     @staticmethod
     def clear():
         RoomHolder.rooms.clear()
-
-
-class RoomCreate:
-    def __init__(self, host: str):
-        pass
-
-    def create(self):
-        pass
-
-class RoomJoin:
-    def __init__(self):
-        pass
-
-    def join(self):
-        pass

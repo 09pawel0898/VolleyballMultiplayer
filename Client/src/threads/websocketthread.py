@@ -4,7 +4,7 @@ import time
 import queue
 from queue import Queue
 from src.networking.serverAPI.serverapi import *
-from src.networking.serverRoom.package import *
+from src.networking.serverRoom.packages import *
 import websockets
 
 class WebsocketThread:
@@ -22,9 +22,9 @@ class WebsocketThread:
        while WebsocketThread._bRunning:
             await asyncio.sleep(0.01)
             if not WebsocketThread._pendingQueue.empty():
-                package_to_send : Package= WebsocketThread._pendingQueue.get(block=True)
+                package_to_send : PackageSend = WebsocketThread._pendingQueue.get(block=True)
                 await WebsocketThread._webSocket.send(package_to_send.json())
-                if package_to_send.code == Code.Disconnect:
+                if package_to_send.header == CodeSend.Disconnected:
                     await WebsocketThread._webSocket.close()
                     return
 
@@ -37,51 +37,31 @@ class WebsocketThread:
             except:
                 return
 
-
-    # @staticmethod
-    # async def _external_handler():
-    #     pending = WebsocketThread._pendingQueue.get(block=False)
-    #     if pending:
-    #         return pending
-
-
     @staticmethod
-    async def _main_loop():
+    async def _init_connection():
         url = WebsocketThread._remote + WebsocketThread._roomHash
 
         WebsocketThread._webSocket = await websockets.connect(url)
 
         WebsocketThread.send(
-            Package(
-                code = Code.Connect,
-                body = StatusFrame(
-                    hash = "",
-                    status = "Connected"
-                )
+            PackageSend(
+                header = CodeSend.Connected,
+                body = ""
             )
         )
         await asyncio.gather(WebsocketThread._sending_handler(),
                              WebsocketThread._receiving_handler())
-        #
-        #
-        # while WebsocketThread._webSocket:
-        #     #await global_websocket.send("Hello")
-        #     msg = await WebsocketThread._webSocket.recv()
-        #     print(msg)
-        #     #pending = ApiReqThread._pendingQueue.get(block=True)
-        #     #ApiReqThread._handle_request(pending)
-        #     #time.sleep(0.1)
         WebsocketThread._bRunning = False
 
     @staticmethod
     def _run():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(WebsocketThread._main_loop())
+        loop.run_until_complete(WebsocketThread._init_connection())
         loop.close()
 
     @staticmethod
-    def send(package : Package) -> None:
+    def send(package : PackageSend) -> None:
         WebsocketThread._pendingQueue.put(package)
 
     @staticmethod
@@ -104,12 +84,9 @@ class WebsocketThread:
     @staticmethod
     def disconnect():
         WebsocketThread.send(
-            Package(
-                code = Code.Disconnect,
-                body = StatusFrame(
-                    hash = "",
-                    status = "Disconnected"
-                )
+            PackageSend(
+                header = CodeSend.Disconnected,
+                body = "Disconnected"
             )
         )
 

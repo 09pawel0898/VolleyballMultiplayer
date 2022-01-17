@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from fastapi import WebSocket, WebSocketDisconnect, status
-from sqlalchemy import update
 import json
 from ..websockets.globalconnectionmanager import GlobalConnectionManager
 from sqlalchemy.orm import Session
 from src.database import get_db
 from ..rooms import models,crud
+from ..websockets.packages import *
 
 router = APIRouter(
     tags=["Websocket"]
@@ -15,33 +15,23 @@ global_connection_manager = GlobalConnectionManager()
 
 @router.websocket("/{room_hash}")
 async def room_endpoint(websocket: WebSocket, room_hash: str, db: Session = Depends(get_db)):
+    existing_room = crud.is_room_existing(db,room_hash)
+    if not existing_room:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+    elif existing_room.players >= 2:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+
     await global_connection_manager.connect_to_room(room_hash,websocket)
 
-    existing_room = db.query(models.Rooms).filter(models.Rooms.hash == room_hash).first()
-    if not existing_room:
-        global_connection_manager.disconnect_from_room(room_hash,websocket)
-
-    if existing_room.players >= 2:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-
-    stmt = (update(models.Rooms).
-            where(models.Rooms.hash == room_hash).
-            values(players=existing_room.players + 1)
-            )
-    db.execute(stmt)
-    db.commit()
-
-    print(db.query(models.Rooms).filter(models.Rooms.hash == room_hash).first().players)
+    crud.set_players_in_room(db,room_hash,existing_room.players + 1)
 
     try:
         #await global_connection_manager.send_personal_message(room_hash, "Ga", websocket)
         while True:
             data = await websocket.receive_text()
             if data is not None:
-                d = json.loads(data)
-                print(d["body"])
-                if d["body"]["status"] == "Connected":
+                header, body = parse_package(parse_recv_data(data))
+                if header == CodeReceived.Connected:
                     global_connection_manager.get_room(room_hash).people+=1
                     if global_connection_manager.get_room(room_hash).people == 2:
                         await global_connection_manager.broadcast(room_hash, "GameStarted")
