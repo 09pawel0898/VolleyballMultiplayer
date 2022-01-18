@@ -28,36 +28,10 @@ class LobbyActivity(UserActivity):
                 if response.response.status == ResponseStatus.Ok:
                     self._activity_state = LobbyActivityState.WaitingInRoom
                     room_hash = response.response.data["hash"]
-                    #selected_room : RoomLabel = state.room_label_manager.get_active_label()
                     WebsocketThread.connect(room_hash)
                     state.show_msg_box("Room created. Waiting..",TextureID.ButtonCancel, state._room_shutdown)
                 else:
                     state.show_msg_box("Your room already exist.",TextureID.ButtonOk, state._hide_msg_box)
-
-            #    if response.response.status == ResponseStatus.SignedUp:
-            #         state.show_msg_box("User successfully registered.")
-            #         self._activity_state = MainMenuActivityState.Idle
-            #         return True
-
-            #if self._activity_state == MainMenuActivityState.WaitingForSignUpResponse:
-            #     if response.response.status == ResponseStatus.SignedUp:
-            #         state.show_msg_box("User successfully registered.")
-            #         self._activity_state = MainMenuActivityState.Idle
-            #         return True
-            #     elif response.response.status == ResponseStatus.UsernameTaken:
-            #         state.show_msg_box("This username is already taken.")
-            #         self._activity_state = MainMenuActivityState.Idle
-            #         return True
-            # elif self._activity_state == MainMenuActivityState.WaitingForSignInResponse:
-            #     if response.response.status == ResponseStatus.SignedIn:
-            #         self._activity_state = MainMenuActivityState.Idle
-            #         state.state_manager.push_state("LobbyState")
-            #         return True
-            #     elif response.response.status == ResponseStatus.BadAuth:
-            #         state.show_msg_box("Bad username or password.")
-            #         self._activity_state = MainMenuActivityState.Idle
-            #         return True
-
             if response.response.status == ResponseStatus.ConnectionError:
                 state.show_msg_box("Connection error.")
             elif response.response.status == ResponseStatus.TimeoutError:
