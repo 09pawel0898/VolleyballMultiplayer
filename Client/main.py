@@ -5,7 +5,6 @@ from src.threads.apithread import ApiReqThread
 
 def main() -> int:
     ApiReqThread.init("http://localhost:8000")
-
     client = Client(1080,540)
     client.run()
     return 0

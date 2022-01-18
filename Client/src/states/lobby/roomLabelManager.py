@@ -58,7 +58,7 @@ class RoomLabelManager:
         rooms : List[RoomDisplayed] = RoomHolder.rooms
 
         for room in rooms:
-            if room.players == 1:
+            if room.players == 0 or room.players == 1:
                 texture = self._texture_empty
                 full = False
             else:

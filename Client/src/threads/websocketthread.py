@@ -1,6 +1,6 @@
 import asyncio
 import threading
-import time
+import json
 import queue
 from queue import Queue
 from src.networking.serverAPI.serverapi import *
@@ -32,7 +32,11 @@ class WebsocketThread:
     async def _receiving_handler():
         while WebsocketThread._bRunning:
             try:
-                package_received = await WebsocketThread._webSocket.recv()
+                data = await WebsocketThread._webSocket.recv()
+                data_json = json.loads(data)
+                package_received : PackageReceived = PackageReceived(
+                    header = data_json["header"],
+                    body = data_json["body"])
                 WebsocketThread._responseQueue.put(package_received)
             except:
                 return
@@ -41,7 +45,12 @@ class WebsocketThread:
     async def _init_connection():
         url = WebsocketThread._remote + WebsocketThread._roomHash
 
-        WebsocketThread._webSocket = await websockets.connect(url)
+        try:
+            WebsocketThread._webSocket = await websockets.connect(url)
+        except:
+            WebsocketThread._responseQueue.put(PackageReceived(header=CodeReceived.Disconnect,
+                                                               body=""))
+            return
 
         WebsocketThread.send(
             PackageSend(
@@ -65,7 +74,7 @@ class WebsocketThread:
         WebsocketThread._pendingQueue.put(package)
 
     @staticmethod
-    def try_receive() -> str | None:
+    def try_receive() -> PackageReceived | None:
         try:
             response = WebsocketThread._responseQueue.get(block=False)
         except queue.Empty:

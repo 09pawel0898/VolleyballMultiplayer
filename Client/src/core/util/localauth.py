@@ -18,7 +18,7 @@ class LocalAuth:
     MAX_EMAIL_LEN = 22
 
     EMAIL_PATTERN = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    LOGIN_PATTERN = "^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$"
+    LOGIN_PATTERN = "^(?=.{4,16}$)(?![.-])(?!.*[.]{2})[a-zA-Z0-9.-]+(?<![.])$"
     PASSWD_PATTERN = "[A-Za-z0-9@#$%^&+=]{6,}"
 
     @staticmethod

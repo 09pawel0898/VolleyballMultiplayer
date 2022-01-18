@@ -26,10 +26,8 @@ class RoomLabel(Button):
         self.people_label_offset = Vec2(330,6)
 
         self.host_label = Label(Vec2(0,0), self.host, 27)
-        if self.full:
-            self.people_label = Label(Vec2(0,0), "2/2", 27)
-        else:
-            self.people_label = Label(Vec2(0,0), "1/2", 27)
+        self.people_label = Label(Vec2(0,0), self.people.__str__()+"/2", 27)
+
 
     def set_active(self, active: bool):
         if active:

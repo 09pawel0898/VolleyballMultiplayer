@@ -3,7 +3,7 @@ from src.core.states.stateidentifiers import StateID
 from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.textbox import TextBox
 from src.core.widgets.label import Label
-from src.core.util.utilis import lerp, start_delayed
+from src.networking.serverRoom.packages import *
 from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
 from src.states.lobby.lobbyActivity import LobbyActivity, LobbyActivityState
 from src.networking.serverAPI.user import User, Guest
@@ -237,9 +237,11 @@ class LobbyState(State):
         #handle api response if there is any
         User.me.activity.handle_response(self,ApiReqThread.try_get_response())
 
-        ws_response = WebsocketThread.try_receive()
-        if ws_response == "GameStarted":
-            self.state_manager.push_state("GameplayState")
+        #handle websocket response if there is any
+        ws_response : PackageReceived= WebsocketThread.try_receive()
+        if ws_response is not None:
+            if ws_response.header == CodeReceived.StartTheGame:
+                self.state_manager.push_state("GameplayState")
 
         #update time widget
         now = datetime.now()
