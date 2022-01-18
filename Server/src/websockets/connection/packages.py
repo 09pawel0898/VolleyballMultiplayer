@@ -7,6 +7,7 @@ class CodeReceived(Enum):
     Connected = 1
     Disconnected = 2
     StartClicked = 3
+    BallMoved = 4
 
 class CodeSend(Enum):
     Null = 0
@@ -15,6 +16,7 @@ class CodeSend(Enum):
     StartTheGame = 3
     PlayerWon = 4
     PlayerLost = 5
+    BallMoved = 6
 
 class PackageSend(BaseModel):
     header : CodeSend

@@ -1,6 +1,8 @@
 from src.networking.serverAPI.useractivity import *
 from src.networking.serverAPI.serverapi import ResponseStatus
 from src.core.defines import DEBUG
+from src.core.resources.sprite import Sprite
+from src.networking.serverRoom.packages import *
 from enum import Enum
 
 class GameplayActivityState(Enum):
@@ -15,18 +17,12 @@ class GameplayActivity(UserActivity):
         if response is not None:
             if DEBUG:
                 print(response)
-            # if self._activity_state == MainMenuActivityState.WaitingForSignUpResponse:
-            #     if response.response.status == ResponseStatus.SignedUp:
-            #         state.show_msg_box("User successfully registered.")
-            #         self._activity_state = MainMenuActivityState.Idle
-            #         return True
-            if response.response.status == ResponseStatus.ConnectionError:
-                state.show_msg_box("Connection error.")
-            elif response.response.status == ResponseStatus.TimeoutError:
-                state.show_msg_box("Timeout.")
-            return True
-        else:
-            return False
+            header, body = parse_package(response)
+            match header:
+                case CodeReceived.BallMoved:
+                    ball : Sprite = state.ball
+                    new_positions = body.split(',')
+                    ball.set_position(int(new_positions[0]),int(new_positions[1]))
 
     def set_state(self, new_state: GameplayActivityState):
         self._activity_state = new_state

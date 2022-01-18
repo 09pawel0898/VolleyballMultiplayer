@@ -62,7 +62,10 @@ class Sprite:
         self.texture.image = pygame.transform.rotate(self.texture.image, self.rotation)
 
     def move(self, vec : Vec2) -> None:
+        temp_origin = self.origin
+        self.set_origin(Origin.TOP_LEFT)
         self.position.x += vec.x
         self.position.y += vec.y
         self.rect.left = self.position.x
         self.rect.top = self.position.y
+        self.set_origin(temp_origin)

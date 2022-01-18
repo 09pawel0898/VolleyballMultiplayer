@@ -1,13 +1,11 @@
 from src.core.states.state import *
 from src.core.states.stateidentifiers import StateID
-from src.core.widgets.button import Button, ButtonBehaviour
-from src.core.widgets.textbox import TextBox
+from src.core.widgets.button import Button
 from src.core.widgets.label import Label
 from src.networking.serverRoom.packages import *
-from src.threads.apithread import ApiReqThread, ApiRequest, PendingRequest
-from src.states.gameplay.gameplayActivity import GameplayActivity, GameplayActivityState
-from src.networking.serverAPI.user import User, Guest
-from datetime import datetime
+from src.states.gameplay.gameplayActivity import GameplayActivity
+from src.networking.serverAPI.user import User
+from src.networking.serverRoom.packages import *
 from src.threads.websocketthread import WebsocketThread
 
 
@@ -26,15 +24,30 @@ class GameplayState(State):
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.Default
         self.beforeMsgAnimState = self.UIAnimState
+        self._init_gameplay_objects()
 
     def _init_user(self):
         User.me.activity = GameplayActivity()
         User.me.state = StateID.Gameplay
+        WebsocketThread.send(PackageSend(header=CodeSend.StartClicked,
+                                         body=""))
         #self.widget_manager.get_widget("UsernameLabel").set_text(User.me.username)
 
 
     def _init_resources(self):
         textures_to_init={
+            TextureID.BackgroundLayer0: "res/img/background_layer0.png",
+            TextureID.BackgroundLayer1: "res/img/background_layer1.png",
+            TextureID.LoginPanel: "res/img/login_panel.png",
+            TextureID.RegisterPanel: "res/img/register_panel.png",
+            TextureID.Logo: "res/img/logo.png",
+            TextureID.Clouds: "res/img/clouds.png",
+            TextureID.ButtonSignIn: "res/img/button_signin.png",
+            TextureID.ButtonSignUp: "res/img/button_signup.png",
+            TextureID.ButtonBack: "res/img/button_back.png",
+            TextureID.ButtonRegister: "res/img/button_register.png",
+            TextureID.MessageBox: "res/img/info_panel.png",
+            TextureID.ButtonOk: "res/img/button_ok.png",
             TextureID.Ball : "res/img/ball.png"
         }
         for key in textures_to_init:
@@ -104,6 +117,14 @@ class GameplayState(State):
                    origin=Origin.TOP_LEFT,
                    position=Vec2(-self.context.window.get_width() * 2, 0)))
 
+    def _init_gameplay_objects(self):
+        texture_manager = self.state_manager.context.texture_manager
+
+        self.ball = Sprite(
+            texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
+        self.ball.set_position(0,0)
+        self.ball.set_size(64,64)
+
     def _on_render(self) -> None:
         window = self.context.window
         #background
@@ -111,6 +132,10 @@ class GameplayState(State):
         self.cloudsPool[0].draw(window)
         self.cloudsPool[1].draw(window)
         self.backgroundLayer1.draw(window)
+
+        #gameplay elements
+        self.ball.draw(window)
+
         #widgets
         self.widget_manager.draw_widgets(window)
 
@@ -130,6 +155,25 @@ class GameplayState(State):
                     else:
                         pass
                         #self.widget_manager.get_widget("ButtonLogout").check_for_onclick()
+            key = pygame.key.get_pressed()
+            moved = False
+            if key[pygame.K_w]:
+                self.ball.move(Vec2(0,-1))
+                moved = True
+            elif key[pygame.K_a]:
+                self.ball.move(Vec2(-1, 0))
+                moved = True
+            elif key[pygame.K_s]:
+                self.ball.move(Vec2(0, 1))
+                moved = True
+            elif key[pygame.K_d]:
+                self.ball.move(Vec2(1, 0))
+                moved = True
+
+            if moved:
+                WebsocketThread.send(PackageSend(header=CodeSend.BallMoved,
+                                                 body=f"{self.ball.position.x},"
+                                                      f"{self.ball.position.y}"))
 
     def _on_awake(self) -> None:
         pass

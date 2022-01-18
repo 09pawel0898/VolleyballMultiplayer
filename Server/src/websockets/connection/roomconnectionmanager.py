@@ -2,6 +2,7 @@ from typing import List
 from fastapi import WebSocket
 from ..room.gamecontroller import GameController
 from .packages import *
+from src.logger import *
 
 class RoomConnectionManager:
     def __init__(self,room_hash: str):
@@ -17,9 +18,11 @@ class RoomConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def handle_recv_package(self,package: PackageReceived):
+    async def handle_recv_package(self,websocket: WebSocket, package: PackageReceived):
         header, body = parse_package(package)
 
+        remote = websocket.client.__str__()
+        Log.add(LogType.LogRoom,f"Received : [{remote}][{header}][{body}]")
         match header:
             case CodeReceived.Connected:
                 self.people += 1
@@ -30,6 +33,10 @@ class RoomConnectionManager:
                             body=""))
             case CodeReceived.Disconnected:
                 pass
+            case CodeReceived.StartClicked:
+                self.game_controller.bGameStarted = True
+            case CodeReceived.BallMoved:
+                await self.broadcast(PackageSend(header=CodeSend.BallMoved, body=body))
 
     async def send_personal_message(self, package: PackageSend, websocket: WebSocket):
         await websocket.send_text(package.json())

@@ -34,8 +34,8 @@ async def room_endpoint(websocket: WebSocket, room_hash: str, db: Session = Depe
             recv_data = await websocket.receive_text()
             if recv_data is not None:
                 package = parse_recv_data(recv_data)
-                await global_connection_manager.get_room(room_hash).handle_recv_package(package)
+                await global_connection_manager.get_room(room_hash).handle_recv_package(websocket, package)
     except WebSocketDisconnect:
         global_connection_manager.disconnect_from_room(room_hash, websocket)
         if crud.delete_room_by_hash(db=db, room_hash = room_hash):
-            Log.add(LogType.LogWS,f"Room {room_hash} deleted because one of players has left.")
+            Log.add(LogType.LogRoom,f"Room {room_hash} deleted because one of players has left.")

@@ -33,10 +33,7 @@ class WebsocketThread:
         while WebsocketThread._bRunning:
             try:
                 data = await WebsocketThread._webSocket.recv()
-                data_json = json.loads(data)
-                package_received : PackageReceived = PackageReceived(
-                    header = data_json["header"],
-                    body = data_json["body"])
+                package_received : PackageReceived = parse_recv_data(data)
                 WebsocketThread._responseQueue.put(package_received)
             except:
                 return
