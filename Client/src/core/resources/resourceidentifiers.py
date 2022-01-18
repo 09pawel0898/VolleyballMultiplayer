@@ -25,3 +25,7 @@ class TextureID(Enum):
     RoomLabelEmpty = 22
     ButtonRefresh = 23
     ButtonCancel = 24
+    ScorePanel = 25
+    PauseButton= 26
+    Grass = 27
+    Pawn = 28

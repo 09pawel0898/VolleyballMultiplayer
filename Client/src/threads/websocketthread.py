@@ -52,7 +52,7 @@ class WebsocketThread:
         WebsocketThread.send(
             PackageSend(
                 header = CodeSend.Connected,
-                body = ""
+                body = User.me.username
             )
         )
         await asyncio.gather(WebsocketThread._sending_handler(),

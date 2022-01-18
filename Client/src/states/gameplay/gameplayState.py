@@ -7,7 +7,7 @@ from src.states.gameplay.gameplayActivity import GameplayActivity
 from src.networking.serverAPI.user import User
 from src.networking.serverRoom.packages import *
 from src.threads.websocketthread import WebsocketThread
-
+from .gamelogic.pawn import Pawn
 
 class UIAnimState(Enum):
     Default = 1
@@ -24,6 +24,8 @@ class GameplayState(State):
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.Default
         self.beforeMsgAnimState = self.UIAnimState
+        self.possessed_pawn = None | Pawn
+        self.rival_pawn = None|Pawn
         self._init_gameplay_objects()
 
     def _init_user(self):
@@ -36,6 +38,7 @@ class GameplayState(State):
 
     def _init_resources(self):
         textures_to_init={
+            #placeholder
             TextureID.BackgroundLayer0: "res/img/background_layer0.png",
             TextureID.BackgroundLayer1: "res/img/background_layer1.png",
             TextureID.LoginPanel: "res/img/login_panel.png",
@@ -48,7 +51,13 @@ class GameplayState(State):
             TextureID.ButtonRegister: "res/img/button_register.png",
             TextureID.MessageBox: "res/img/info_panel.png",
             TextureID.ButtonOk: "res/img/button_ok.png",
-            TextureID.Ball : "res/img/ball.png"
+            # placeholder
+
+            TextureID.Ball: "res/img/ball.png",
+            TextureID.ScorePanel: "res/img/score_panel.png",
+            TextureID.PauseButton: "res/img/pause_button.png",
+            TextureID.Grass: "res/img/grass.png",
+            TextureID.Pawn: "res/img/pawn.png"
         }
         for key in textures_to_init:
             self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
@@ -62,7 +71,7 @@ class GameplayState(State):
         #labels
         self.widget_manager.init_widget(
             "ScoreLabel",
-            Label(Vec2(170,36),"",30,font="Agency FB"))
+            Label(Vec2(522,31),"0:0",36,font="Agency FB"))
         #self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)
 
     def _startgame_onclick(self):
@@ -105,6 +114,11 @@ class GameplayState(State):
             texture_manager.get_resource(TextureID.BackgroundLayer0), origin=Origin.TOP_LEFT, position=Vec2(0,0))
         self.backgroundLayer1 = Sprite(
             texture_manager.get_resource(TextureID.BackgroundLayer1), origin=Origin.TOP_LEFT, position=Vec2(0,0))
+        self.grass = Sprite(
+            texture_manager.get_resource(TextureID.Grass), origin=Origin.TOP_LEFT, position=Vec2(0,0))
+        self.score_panel = Sprite(
+            texture_manager.get_resource(TextureID.ScorePanel), origin=Origin.TOP_LEFT, position=Vec2(0, 0))
+
         #clouds
         self.cloudsPool : [Sprite] = []
         self.cloudsPool.append(
@@ -120,10 +134,24 @@ class GameplayState(State):
     def _init_gameplay_objects(self):
         texture_manager = self.state_manager.context.texture_manager
 
+        #ball
         self.ball = Sprite(
             texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
         self.ball.set_position(0,0)
         self.ball.set_size(64,64)
+
+        #players
+        self.left_pawn = Pawn(True, texture_manager.get_resource(TextureID.Pawn))
+        self.right_pawn = Pawn(False, texture_manager.get_resource(TextureID.Pawn))
+        #DEBUG
+        self._init_round()
+
+    def _set_rival_username(self):
+        pass
+
+    def _init_round(self):
+        my_side = 0
+        self.possessed_pawn = self.left_pawn
 
     def _on_render(self) -> None:
         window = self.context.window
@@ -133,8 +161,14 @@ class GameplayState(State):
         self.cloudsPool[1].draw(window)
         self.backgroundLayer1.draw(window)
 
+        self.grass.draw(window)
+        self.score_panel.draw(window)
+
         #gameplay elements
         self.ball.draw(window)
+        #pawns
+        self.left_pawn.draw(window)
+        self.right_pawn.draw(window)
 
         #widgets
         self.widget_manager.draw_widgets(window)
@@ -180,7 +214,7 @@ class GameplayState(State):
 
     def _update_clouds(self, dt):
         for clouds in self.cloudsPool:
-            clouds.move(Vec2(0.1*dt, 0))
+            clouds.move(Vec2(0.07*dt, 0))
             if clouds.position.x > self.context.window.get_width():
                 clouds.set_position(-self.context.window.get_width(), 0)
 

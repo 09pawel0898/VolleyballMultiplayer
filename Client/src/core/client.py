@@ -53,9 +53,9 @@ class Client:
 
     def run(self) -> None:
         self._running = True
-        self._state_manager.push_state("MainMenuState")
+        #self._state_manager.push_state("MainMenuState")
         #self._state_manager.push_state("LobbyState")
-        #self._state_manager.push_state("GameplayState")
+        self._state_manager.push_state("GameplayState")
         clock = pygame.time.Clock()
         pygame.init()
         while self._running:

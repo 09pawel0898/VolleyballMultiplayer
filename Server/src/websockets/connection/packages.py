@@ -17,6 +17,8 @@ class CodeSend(Enum):
     PlayerWon = 4
     PlayerLost = 5
     BallMoved = 6
+    RivalUsername = 7
+    InitNewRound = 8
 
 class PackageSend(BaseModel):
     header : CodeSend

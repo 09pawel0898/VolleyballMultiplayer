@@ -217,7 +217,7 @@ class LobbyState(State):
 
     def _update_clouds(self, dt):
         for clouds in self.cloudsPool:
-            clouds.move(Vec2(0.1*dt, 0))
+            clouds.move(Vec2(0.07*dt, 0))
             if clouds.position.x > self.context.window.get_width():
                 clouds.set_position(-self.context.window.get_width(), 0)
 

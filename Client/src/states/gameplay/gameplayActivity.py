@@ -1,5 +1,5 @@
 from src.networking.serverAPI.useractivity import *
-from src.networking.serverAPI.serverapi import ResponseStatus
+from src.core.util.logger import *
 from src.core.defines import DEBUG
 from src.core.resources.sprite import Sprite
 from src.networking.serverRoom.packages import *
@@ -15,14 +15,17 @@ class GameplayActivity(UserActivity):
 
     def handle_response(self, state, response) -> bool:
         if response is not None:
-            if DEBUG:
-                print(response)
+
             header, body = parse_package(response)
+            if DEBUG:
+                Log.add(LogType.LogRoom,f"Received : [{header}][{body}]")
+
             match header:
                 case CodeReceived.BallMoved:
                     ball : Sprite = state.ball
                     new_positions = body.split(',')
                     ball.set_position(int(new_positions[0]),int(new_positions[1]))
+            return True
 
     def set_state(self, new_state: GameplayActivityState):
         self._activity_state = new_state

@@ -3,13 +3,16 @@ from fastapi import WebSocket
 from ..room.gamecontroller import GameController
 from .packages import *
 from src.logger import *
+from ..room.player import Player
 
 class RoomConnectionManager:
     def __init__(self,room_hash: str):
         self.hash = room_hash
         self.active_connections: List[WebSocket] = []
-        self.game_controller = GameController()
+        self.game_controller = GameController(self)
         self.people = 0
+        self.host : Player|None = None
+        self.rival : Player|None = None
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -26,11 +29,15 @@ class RoomConnectionManager:
         match header:
             case CodeReceived.Connected:
                 self.people += 1
-                if self.people == 2:
+                if self.people == 1:
+                    self.game_controller.host = self.host = Player(websocket,body)
+                elif self.people == 2:
+                    self.game_controller.rival = self.rival = Player(websocket,body)
                     if not self.game_controller.bGameStarted:
-                        await self.broadcast(PackageSend(
-                            header=CodeSend.StartTheGame,
-                            body=""))
+                        await self.game_controller.send_start_the_game()
+                        await self.game_controller.send_usernames_to_each_other()
+                        await self.game_controller.send_init_round()
+
             case CodeReceived.Disconnected:
                 pass
             case CodeReceived.StartClicked:
