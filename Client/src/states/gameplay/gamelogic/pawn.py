@@ -1,3 +1,5 @@
+import pygame
+
 from src.core.resources.sprite import *
 from typing import List
 from src.networking.serverRoom.packages import *
@@ -14,6 +16,12 @@ class PawnState(Enum):
     Falling = 1
     Raising = 2
 
+class CollisionType(Enum):
+    Wall = 1
+    Floor = 2
+    WallAndFloor = 3
+    NoCollision = 4
+
 class Pawn(Sprite):
     def __init__(self, side: int,
                  texture : Texture,
@@ -22,9 +30,9 @@ class Pawn(Sprite):
                  origin : Origin = Origin.CENTER):
         super().__init__(texture,origin,Vec2(x,y))
         self.bLeftSide = True if side == 0 else False
-        self.state = PawnState.Walk
+        self.state = PawnState.Falling
         self.speed = Vec2(0,0)
-        self.modY = 0.05
+        self.modY = 1
         self.vert_input = 0.0
         self._init_at_position()
 
@@ -42,35 +50,73 @@ class Pawn(Sprite):
 
     def update(self, dt: float, colliders: List[Rectangle]):
         self.speed = Vec2(lerp(self.speed.x, self.vert_input, dt*0.01),
-                          self.speed.y)
+                          lerp(self.speed.y, self.modY, dt*0.01))
+        #print(self.modY)
+        if self.state == PawnState.Falling:
+            if self.modY < 0.315:
+                self.modY = 0
+                self.state = PawnState.Walk
+            else:
+                self.state = PawnState.Falling
+                self.modY *= 1.06
+
+        elif self.state == PawnState.Raising:
+            if self.modY > -0.315:
+                self.modY = 0.36
+                self.state = PawnState.Falling
+            else:
+                self.state = PawnState.Raising
+                self.modY /= 1.06
+
 
         next_position = (self.position.x + self.speed.x,
                          self.position.y + self.speed.y)
-        collision = False
-        for collider in colliders:
-            if self._check_collision(collider, next_position):
-                collision = True
-                break
 
-        if not collision:
+        prev_collision = found_collision = CollisionType.NoCollision
+
+        for collider in colliders:
+            collision = self._check_collision(collider, next_position)
+            if collision != CollisionType.NoCollision:
+                found_collision = collision
+                if prev_collision != CollisionType.NoCollision:
+                    found_collision = CollisionType.WallAndFloor
+                    break
+                elif prev_collision == CollisionType.NoCollision:
+                    prev_collision = collision
+
+
+        if found_collision == CollisionType.NoCollision:
             self.set_position(self.position.x + self.speed.x,
                               self.position.y + self.speed.y)
+        elif found_collision == CollisionType.Floor:
+            self.set_position(self.position.x + self.speed.x,
+                              self.position.y)
+        elif found_collision == CollisionType.Wall:
+            self.set_position(self.position.x,
+                              self.position.y + self.speed.y)
 
-    def _check_collision(self, rect: Rectangle, pos_to_check) -> bool:
+    def _check_collision(self, rect: Rectangle, pos_to_check) -> CollisionType:
         rect_points = []
         rect_points.append((pos_to_check[0]-self.width/2,pos_to_check[1]-self.height/2))
         rect_points.append((pos_to_check[0]-self.width/2,pos_to_check[1]+self.height/2))
         rect_points.append((pos_to_check[0]+self.width/2,pos_to_check[1]+self.height/2))
         rect_points.append((pos_to_check[0]+self.width/2,pos_to_check[1]-self.height/2))
 
+        collision_type = CollisionType.NoCollision
         for point in rect_points:
             if rect.in_bounds(point[0], point[1]):
-                return True
-        return False
+                if rect.orientation == Orientation.Horizontal:
+                    self.modY = 0
+                    collision_type = CollisionType.Floor
+                elif rect.orientation == Orientation.Vertical:
+                    collision_type = CollisionType.Wall
+        return collision_type
 
     def _jump(self):
         if self.state == PawnState.Walk:
-            pass
+            #print("Jump")
+            self.modY = -8.0
+            self.state = PawnState.Raising
 
     def handle_events(self, events: List[pygame.event.Event]):
         key = pygame.key.get_pressed()
@@ -84,6 +130,8 @@ class Pawn(Sprite):
             self.vert_input = 2
         else:
             self.vert_input = 0
+        if key[pygame.K_SPACE]:
+            self._jump()
         #if moved:
             #WebsocketThread.send(PackageSend(header=CodeSend.BallMoved,
             #                                 body=f"{self.ball.position.x},"
