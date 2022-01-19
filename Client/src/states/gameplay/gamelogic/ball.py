@@ -17,11 +17,11 @@ class Ball(Sprite):
         self.D =0.0
         self.radius = 0
         self.bPlayerInteractionEnabled = True
+
         #self.bIsRisingUp = False
 
     def update(self, dt: float, colliders: List[Rectangle]) -> None:
-        self.radius = self.texture.image.get_rect().height/2
-
+        self.radius = self.texture.image.get_rect().height / 2
         if self.D == 0:
             self.rotation /= 1.01
         if self.speed < 0:
