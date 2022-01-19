@@ -43,7 +43,7 @@ class Sprite:
                 self.rect = self.texture.image.get_rect(bottomright=[self.position.x, self.position.y])
         self.origin = origin
 
-    def set_position(self,x: int, y: int) -> None:
+    def set_position(self,x: float, y: float) -> None:
         temp_origin = self.origin
         self.set_origin(Origin.TOP_LEFT)
         self.position.x = self.rect.left = x

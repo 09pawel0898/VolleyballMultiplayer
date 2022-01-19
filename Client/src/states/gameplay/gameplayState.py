@@ -2,12 +2,13 @@ from src.core.states.state import *
 from src.core.states.stateidentifiers import StateID
 from src.core.widgets.button import Button
 from src.core.widgets.label import Label
-from src.networking.serverRoom.packages import *
 from src.states.gameplay.gameplayActivity import GameplayActivity
 from src.networking.serverAPI.user import User
 from src.networking.serverRoom.packages import *
 from src.threads.websocketthread import WebsocketThread
 from .gamelogic.pawn import Pawn
+from .gamelogic.ball import Ball
+from .gamelogic.gameplaycontroller import GameplayController
 
 class UIAnimState(Enum):
     Default = 1
@@ -24,8 +25,9 @@ class GameplayState(State):
         self.bMsgPanelActive = False
         self.UIAnimState = UIAnimState.Default
         self.beforeMsgAnimState = self.UIAnimState
-        self.possessed_pawn = None | Pawn
-        self.rival_pawn = None|Pawn
+        self.possessed_pawn = None
+        self.rival_pawn = None
+        self.gameplay_controller = None
         self._init_gameplay_objects()
 
     def _init_user(self):
@@ -57,7 +59,8 @@ class GameplayState(State):
             TextureID.ScorePanel: "res/img/score_panel.png",
             TextureID.PauseButton: "res/img/pause_button.png",
             TextureID.Grass: "res/img/grass.png",
-            TextureID.Pawn: "res/img/pawn.png"
+            TextureID.Pawn: "res/img/pawn.png",
+            TextureID.Pawn2: "res/img/pawn2.png"
         }
         for key in textures_to_init:
             self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
@@ -135,14 +138,16 @@ class GameplayState(State):
         texture_manager = self.state_manager.context.texture_manager
 
         #ball
-        self.ball = Sprite(
+        self.ball = Ball(
             texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
-        self.ball.set_position(0,0)
+        self.ball.set_position(200,200)
         self.ball.set_size(64,64)
 
         #players
-        self.left_pawn = Pawn(True, texture_manager.get_resource(TextureID.Pawn))
-        self.right_pawn = Pawn(False, texture_manager.get_resource(TextureID.Pawn))
+        self.left_pawn = Pawn(0, texture_manager.get_resource(TextureID.Pawn),0,0)
+        #self.left_pawn.move(Vec2(self.left_pawn.position.x,self.left_pawn.position.y))
+        self.right_pawn = Pawn(1, texture_manager.get_resource(TextureID.Pawn2),0,0)
+        #self.right_pawn.move(Vec2(self.right_pawn.position.x, self.right_pawn.position.y))
         #DEBUG
         self._init_round()
 
@@ -151,7 +156,17 @@ class GameplayState(State):
 
     def _init_round(self):
         my_side = 0
-        self.possessed_pawn = self.left_pawn
+        if my_side == 0:
+            print("Possess left")
+            self.possessed_pawn = self.left_pawn
+            self.rival_pawn = self.right_pawn
+        elif my_side == 1:
+            print("Possess right")
+            self.possessed_pawn = self.right_pawn
+            self.rival_pawn = self.left_pawn
+
+        self.gameplay_controller = GameplayController(
+            my_side,self.possessed_pawn,self.rival_pawn,self.ball)
 
     def _on_render(self) -> None:
         window = self.context.window
@@ -170,6 +185,10 @@ class GameplayState(State):
         self.left_pawn.draw(window)
         self.right_pawn.draw(window)
 
+        #DEBUG COLLIDERS
+        for collider in self.gameplay_controller.colliders:
+            collider.draw(window)
+
         #widgets
         self.widget_manager.draw_widgets(window)
 
@@ -182,6 +201,9 @@ class GameplayState(State):
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         if self.bInputEnabled:
+
+            self.possessed_pawn.handle_events(events)
+
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.UIAnimState == UIAnimState.MessageBoxShowed:
@@ -189,25 +211,6 @@ class GameplayState(State):
                     else:
                         pass
                         #self.widget_manager.get_widget("ButtonLogout").check_for_onclick()
-            key = pygame.key.get_pressed()
-            moved = False
-            if key[pygame.K_w]:
-                self.ball.move(Vec2(0,-1))
-                moved = True
-            elif key[pygame.K_a]:
-                self.ball.move(Vec2(-1, 0))
-                moved = True
-            elif key[pygame.K_s]:
-                self.ball.move(Vec2(0, 1))
-                moved = True
-            elif key[pygame.K_d]:
-                self.ball.move(Vec2(1, 0))
-                moved = True
-
-            if moved:
-                WebsocketThread.send(PackageSend(header=CodeSend.BallMoved,
-                                                 body=f"{self.ball.position.x},"
-                                                      f"{self.ball.position.y}"))
 
     def _on_awake(self) -> None:
         pass
@@ -229,6 +232,7 @@ class GameplayState(State):
             self.widget_manager.update_widgets(dt)
         self._update_ui(dt)
         self._update_clouds(dt)
+        self.gameplay_controller.update(dt)
 
         #handle websocket response if there is any
         User.me.activity.handle_response(self,WebsocketThread.try_receive())
