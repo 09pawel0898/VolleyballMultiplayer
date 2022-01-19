@@ -30,30 +30,30 @@ class Pawn(Sprite):
                  origin : Origin = Origin.CENTER):
         super().__init__(texture,origin,Vec2(x,y))
         self.bLeftSide = True if side == 0 else False
-        self.state = PawnState.Falling
+        self.state = PawnState.Walk
         self.speed = Vec2(0,0)
-        self.modY = 1
+        self.modY = 0
         self.vert_input = 0.0
         self._init_at_position()
 
     def _init_at_position(self):
         if self.bLeftSide:
             print("Left")
-            self.set_position(100,300)
+            self.set_position(100,428)
         else:
             print("Right")
-            self.set_position(700, 300)
+            self.set_position(980, 428)
         self.set_origin(Origin.TOP_LEFT)
-        self.width = self.rect[2]
-        self.height = self.rect[3]
+        self.width = self.drawn_rect[2]
+        self.height = self.drawn_rect[3]
         self.set_origin(Origin.CENTER)
 
     def update(self, dt: float, colliders: List[Rectangle]):
-        self.speed = Vec2(lerp(self.speed.x, self.vert_input, dt*0.01),
-                          lerp(self.speed.y, self.modY, dt*0.01))
+        self.speed = Vec2(lerp(self.speed.x, self.vert_input, dt*0.03),
+                          lerp(self.speed.y, self.modY, dt*0.03))
         #print(self.modY)
         if self.state == PawnState.Falling:
-            if self.modY < 0.315:
+            if self.modY < 0.55:
                 self.modY = 0
                 self.state = PawnState.Walk
             else:
@@ -61,8 +61,8 @@ class Pawn(Sprite):
                 self.modY *= 1.06
 
         elif self.state == PawnState.Raising:
-            if self.modY > -0.315:
-                self.modY = 0.36
+            if self.modY > -0.515:
+                self.modY = 0.6
                 self.state = PawnState.Falling
             else:
                 self.state = PawnState.Raising
@@ -115,7 +115,7 @@ class Pawn(Sprite):
     def _jump(self):
         if self.state == PawnState.Walk:
             #print("Jump")
-            self.modY = -8.0
+            self.modY = -10.0
             self.state = PawnState.Raising
 
     def handle_events(self, events: List[pygame.event.Event]):
@@ -139,6 +139,6 @@ class Pawn(Sprite):
 
     def draw(self, window: Surface):
         if self.bLeftSide:
-            window.blit(self.texture.image, self.rect)
+            window.blit(self.drawn_image, self.drawn_rect)
         else:
-            window.blit(pygame.transform.flip(self.texture.image, True, False), self.rect)
+            window.blit(pygame.transform.flip(self.drawn_image, True, False), self.drawn_rect)

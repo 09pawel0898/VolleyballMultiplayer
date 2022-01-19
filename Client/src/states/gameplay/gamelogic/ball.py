@@ -45,7 +45,7 @@ class Ball(Sprite):
         for collider in colliders:
             self._check_wall_collision(collider)
         self.rotation /= 1.0005
-        self.rotate(self.D)
+        self.rotate(-self.D)
 
     def _check_wall_collision(self, rect: Rectangle):
         if rect.orientation == Orientation.Horizontal:
@@ -68,20 +68,20 @@ class Ball(Sprite):
             ball_x = self.position.x
             ball_y = self.position.y
             x = abs(ball_x-player_x)
-            y = abs(ball_y-player_y)
+            y = ball_y-player_y
             d = math.sqrt(x*x+y*y)
 
             if d < self.radius + player_radius:
                 if y > 0:
-                    self.speed = -10
-                elif y < 0:
                     self.speed = 5
-
+                    print(-10)
+                elif y < 0:
+                    self.speed = -10
+                    print(-10)
                 self.D =  (ball_x - player_x)/14.0
                 self.bPlayerInteractionEnabled = False
                 start_delayed(0.5,self._enable_player_interaction)
 
     def _enable_player_interaction(self):
         self.bPlayerInteractionEnabled = True
-        print("Enabled")
 

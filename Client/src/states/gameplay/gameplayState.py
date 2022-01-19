@@ -20,22 +20,23 @@ class GameplayState(State):
         self._init_state_content()
         self._init_widgets()
         self._init_msg_box()
-        self._init_user()
         self.bInputEnabled = True
         self.bMsgPanelActive = False
+        self.bGameStarted = False
         self.UIAnimState = UIAnimState.Default
         self.beforeMsgAnimState = self.UIAnimState
         self.possessed_pawn = None
         self.rival_pawn = None
         self.gameplay_controller = None
         self._init_gameplay_objects()
+        self._init_user()
 
     def _init_user(self):
         User.me.activity = GameplayActivity()
         User.me.state = StateID.Gameplay
-        WebsocketThread.send(PackageSend(header=CodeSend.StartClicked,
-                                         body=""))
-        #self.widget_manager.get_widget("UsernameLabel").set_text(User.me.username)
+        #self.show_msg_box("Press OK when you're ready.",
+        #                  TextureID.ButtonOk,
+        #                  self._startgame_onclick)
 
 
     def _init_resources(self):
@@ -78,7 +79,8 @@ class GameplayState(State):
         #self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)
 
     def _startgame_onclick(self):
-        pass
+        WebsocketThread.send(PackageSend(header=CodeSend.StartClicked,
+                                         body=""))
 
     def _exit_onclick(self):
         pass
@@ -140,21 +142,21 @@ class GameplayState(State):
         #ball
         self.ball = Ball(
             texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
-        self.ball.set_position(200,200)
         self.ball.set_size(64,64)
+        self.ball.set_position(200,200)
+
 
         #players
         self.left_pawn = Pawn(0, texture_manager.get_resource(TextureID.Pawn),0,0)
-        #self.left_pawn.move(Vec2(self.left_pawn.position.x,self.left_pawn.position.y))
         self.right_pawn = Pawn(1, texture_manager.get_resource(TextureID.Pawn2),0,0)
-        #self.right_pawn.move(Vec2(self.right_pawn.position.x, self.right_pawn.position.y))
+
         #DEBUG
-        self._init_round()
+        self.init_round()
 
     def _set_rival_username(self):
         pass
 
-    def _init_round(self):
+    def init_round(self):
         my_side = 0
         if my_side == 0:
             print("Possess left")
@@ -202,7 +204,8 @@ class GameplayState(State):
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         if self.bInputEnabled:
 
-            self.possessed_pawn.handle_events(events)
+            if self.possessed_pawn is not None:
+                self.possessed_pawn.handle_events(events)
 
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -217,12 +220,10 @@ class GameplayState(State):
 
     def _update_clouds(self, dt):
         for clouds in self.cloudsPool:
+            print(clouds.position.x,clouds.position.y)
             clouds.move(Vec2(0.07*dt, 0))
             if clouds.position.x > self.context.window.get_width():
                 clouds.set_position(-self.context.window.get_width(), 0)
-
-    def _update_ui(self, dt):
-        pass
 
     def _on_update(self, dt: float) -> None:
         # msg box not handled by manager due to Z-buffer bug
@@ -230,9 +231,10 @@ class GameplayState(State):
             self.msgButton.update(dt)
         else:
             self.widget_manager.update_widgets(dt)
-        self._update_ui(dt)
         self._update_clouds(dt)
-        self.gameplay_controller.update(dt)
+
+        if self.gameplay_controller is not None:
+            self.gameplay_controller.update(dt)
 
         #handle websocket response if there is any
         User.me.activity.handle_response(self,WebsocketThread.try_receive())
