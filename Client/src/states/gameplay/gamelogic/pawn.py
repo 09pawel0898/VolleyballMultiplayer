@@ -35,9 +35,9 @@ class Pawn(Sprite):
         self.modY = 0
         self.vert_input = 0.0
         self.prev_position = (0,0)
-        self._init_at_position()
+        self.init_at_position()
 
-    def _init_at_position(self):
+    def init_at_position(self):
         if self.bLeftSide:
             self.set_position(100,428)
         else:

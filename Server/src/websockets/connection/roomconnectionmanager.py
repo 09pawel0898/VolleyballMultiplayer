@@ -63,6 +63,30 @@ class RoomConnectionManager:
                         PackageSend(header=CodeSend.PlayerMoved, body=body),
                         self.host.websocket)
 
+            case CodeReceived.BallTouchedFloor:
+                if self.game_controller.bGameStarted == True:
+                    side = int(body)
+                    winner = self.host
+                    self.start_clicks = 0
+                    if self.game_controller.bHostLeftSide:
+                        if side == 0:
+                            winner: Player = self.host
+                        elif side == 1:
+                            winner: Player = self.rival
+                    else:
+                        if side == 0:
+                            winner: Player = self.rival
+                        elif side == 1:
+                            winner: Player = self.host
+                    loser : Player = self.host if winner == self.rival else self.rival
+                    await self.send_personal_message(
+                        PackageSend(header=CodeSend.RoundEnd, body="0"),
+                        loser.websocket)
+                    await self.send_personal_message(
+                        PackageSend(header=CodeSend.RoundEnd, body="1"),
+                        winner.websocket)
+                self.game_controller.bGameStarted = False
+
     def _received_from_host(self, websocket) ->bool:
         if websocket == self.host.websocket:
             return True

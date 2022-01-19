@@ -18,6 +18,7 @@ class Ball(Sprite):
         self.rotation = 0.0
         self.D =0.0
         self.radius = 0
+        self.bStopped = False
         self.bPlayerInteractionEnabled = True
 
         #self.bIsRisingUp = False
@@ -49,10 +50,23 @@ class Ball(Sprite):
         self.rotation /= 1.0005
         self.rotate(-self.D)
 
+
     def _check_wall_collision(self, rect: Rectangle):
         if rect.orientation == Orientation.Horizontal:
             if rect.in_bounds(self.position.x+self.radius,self.position.y+self.radius):
                 self.speed *= -1
+                if not self.bStopped:
+                    if self.position.y > 400:
+                        side = ""
+                        if self.position.x < 540:
+                            side = 0
+                        elif self.position.x > 540:
+                            side = 1
+                        WebsocketThread.send(
+                            PackageSend(
+                                header=CodeSend.BallTouchedFloor,
+                                body=f"{side}"))
+                        self.bStopped = True
         if rect.orientation == Orientation.Vertical:
             if rect.in_bounds(self.position.x-self.radius,self.position.y):
                 self.D *= -1

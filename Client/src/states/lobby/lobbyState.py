@@ -89,7 +89,7 @@ class LobbyState(State):
             Label(Vec2(480, 36), "0/0", 30, font="Agency FB"))
         self.widget_manager.init_widget(
             "TimeLabel",
-            Label(Vec2(771,27), "",50,font="Agency FB")
+            Label(Vec2(773,27), "",50,font="Agency FB")
         )
 
         self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)

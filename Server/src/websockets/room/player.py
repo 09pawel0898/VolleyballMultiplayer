@@ -6,3 +6,4 @@ class Player:
         self.port = websocket.client.port
         self.websocket = websocket
         self.username = username
+        self.points = 0

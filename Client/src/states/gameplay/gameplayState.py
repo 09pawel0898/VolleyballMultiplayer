@@ -43,18 +43,18 @@ class GameplayState(State):
     def _init_resources(self):
         textures_to_init={
             #placeholder
-            # TextureID.BackgroundLayer0: "res/img/background_layer0.png",
-            # TextureID.BackgroundLayer1: "res/img/background_layer1.png",
-            # TextureID.LoginPanel: "res/img/login_panel.png",
-            # TextureID.RegisterPanel: "res/img/register_panel.png",
-            # TextureID.Logo: "res/img/logo.png",
-            # TextureID.Clouds: "res/img/clouds.png",
-            # TextureID.ButtonSignIn: "res/img/button_signin.png",
-            # TextureID.ButtonSignUp: "res/img/button_signup.png",
-            # TextureID.ButtonBack: "res/img/button_back.png",
-            # TextureID.ButtonRegister: "res/img/button_register.png",
-            # TextureID.MessageBox: "res/img/info_panel.png",
-            # TextureID.ButtonOk: "res/img/button_ok.png",
+            TextureID.BackgroundLayer0: "res/img/background_layer0.png",
+            TextureID.BackgroundLayer1: "res/img/background_layer1.png",
+            TextureID.LoginPanel: "res/img/login_panel.png",
+            TextureID.RegisterPanel: "res/img/register_panel.png",
+            TextureID.Logo: "res/img/logo.png",
+            TextureID.Clouds: "res/img/clouds.png",
+            TextureID.ButtonSignIn: "res/img/button_signin.png",
+            TextureID.ButtonSignUp: "res/img/button_signup.png",
+            TextureID.ButtonBack: "res/img/button_back.png",
+            TextureID.ButtonRegister: "res/img/button_register.png",
+            TextureID.MessageBox: "res/img/info_panel.png",
+            TextureID.ButtonOk: "res/img/button_ok.png",
             # placeholder
 
             TextureID.Ball: "res/img/ball.png",
@@ -76,8 +76,23 @@ class GameplayState(State):
         #labels
         self.widget_manager.init_widget(
             "ScoreLabel",
-            Label(Vec2(522,31),"0:0",36,font="Agency FB"))
-        #self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)
+            Label(Vec2(-200,-200),"0:0",36,font="Agency FB"))
+
+    def update_score(self, status: int):
+        if status == 1:
+            self.gameplay_controller.possessed_score += 1
+        elif status == 0:
+            self.gameplay_controller.rival_score += 1
+
+        if self.gameplay_controller.possessed_pawn.bLeftSide:
+            new_score = self.gameplay_controller.possessed_score.__str__() + ":" +\
+                        self.gameplay_controller.rival_score.__str__()
+        else:
+            new_score = self.gameplay_controller.rival_score.__str__()+ ":" +\
+                        self.gameplay_controller.possessed_score.__str__()
+
+        self.widget_manager.get_widget("ScoreLabel").set_position(522,31)
+        self.widget_manager.get_widget("ScoreLabel").set_text(new_score)
 
     def _startgame_onclick(self):
         if not self.bReadyClicked:
@@ -166,21 +181,23 @@ class GameplayState(State):
             print("Possess right")
             self.possessed_pawn = self.right_pawn
             self.rival_pawn = self.left_pawn
-
-        self.gameplay_controller = GameplayController(
-            my_side,self.possessed_pawn,self.rival_pawn,self.ball)
+        if self.gameplay_controller is None:
+            self.gameplay_controller = GameplayController(
+                my_side,self.possessed_pawn,self.rival_pawn,self.ball)
+        self.gameplay_controller.possessed_pawn.init_at_position()
+        self.gameplay_controller.rival_pawn.init_at_position()
+        self.widget_manager.get_widget("ScoreLabel").set_position(522, 31)
 
     def init_ball(self, side: int):
         if side == 0:
             position = Vec2(200,200)
         else:
-            position = Vec2(700,200)
+            position = Vec2(880,200)
 
         self.ball = Ball(
             self.context.texture_manager.get_resource(TextureID.Ball),
-            origin=Origin.CENTER,
-            position=position)
-        self.ball.set_position(200,200)
+            origin=Origin.CENTER)
+        self.ball.set_position(position.x,position.y)
         self.gameplay_controller.add_ball(self.ball)
 
     def _on_render(self) -> None:
@@ -253,5 +270,9 @@ class GameplayState(State):
 
     def _shutdown(self) -> None:
         WebsocketThread.disconnect()
+        self.gameplay_controller = None
+        self.ball = None
+        self.left_pawn = None
+        self.right_pawn = None
 
 

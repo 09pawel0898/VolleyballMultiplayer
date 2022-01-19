@@ -12,6 +12,8 @@ class GameplayController:
         self.ball = ball
         self.possessed_pawn = possessed_pawn
         self.rival_pawn = rival_pawn
+        self.possessed_score = 0
+        self.rival_score = 0
         self._init_colliders()
 
     def _init_colliders(self):
