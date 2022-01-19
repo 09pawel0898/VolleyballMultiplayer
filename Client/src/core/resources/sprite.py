@@ -20,9 +20,10 @@ class Sprite:
         self.rotation : float = 0.0
         self.rect = None
         self.set_origin(origin)
+        self.drawn_image = self.texture.image
 
     def draw(self, window: Surface) -> None:
-        window.blit(self.texture.image,self.rect)
+        window.blit(self.drawn_image,self.rect)
 
     def set_size(self, x: int, y: int) -> None:
         pass
@@ -59,7 +60,9 @@ class Sprite:
 
     def rotate(self, degree: float):
         self.rotation += degree
-        self.texture.image = pygame.transform.rotate(self.texture.image, self.rotation)
+        self.drawn_image = pygame.transform.rotate(self.texture.image, self.rotation)
+        prev_rect = self.rect
+        self.rect = self.texture.image.get_rect(center=prev_rect.center)
 
     def move(self, vec : Vec2) -> None:
         temp_origin = self.origin

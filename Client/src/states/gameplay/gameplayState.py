@@ -186,8 +186,8 @@ class GameplayState(State):
         self.right_pawn.draw(window)
 
         #DEBUG COLLIDERS
-        for collider in self.gameplay_controller.colliders:
-            collider.draw(window)
+        #for collider in self.gameplay_controller.colliders:
+        #    collider.draw(window)
 
         #widgets
         self.widget_manager.draw_widgets(window)

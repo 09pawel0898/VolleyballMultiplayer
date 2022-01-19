@@ -23,4 +23,5 @@ class GameplayController:
 
     def update(self, dt: float):
         self.ball.update(dt,self.colliders)
+        self.ball.check_player_collision((self.possessed_pawn.position.x,self.possessed_pawn.position.y),45.0)
         self.possessed_pawn.update(dt, self.colliders)
