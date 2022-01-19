@@ -34,14 +34,13 @@ class Pawn(Sprite):
         self.speed = Vec2(0,0)
         self.modY = 0
         self.vert_input = 0.0
+        self.prev_position = (0,0)
         self._init_at_position()
 
     def _init_at_position(self):
         if self.bLeftSide:
-            print("Left")
             self.set_position(100,428)
         else:
-            print("Right")
             self.set_position(980, 428)
         self.set_origin(Origin.TOP_LEFT)
         self.width = self.drawn_rect[2]
@@ -95,6 +94,12 @@ class Pawn(Sprite):
             self.set_position(self.position.x,
                               self.position.y + self.speed.y)
 
+        if self.prev_position[0] != self.position.x or self.position.y != self.prev_position[1]:
+            WebsocketThread.send(PackageSend(header=CodeSend.PlayerMoved,
+                                             body=f"{self.position.x},{self.position.y}"))
+        self.prev_position = (self.position.x, self.position.y)
+
+
     def _check_collision(self, rect: Rectangle, pos_to_check) -> CollisionType:
         rect_points = []
         rect_points.append((pos_to_check[0]-self.width/2,pos_to_check[1]-self.height/2))
@@ -120,10 +125,9 @@ class Pawn(Sprite):
 
     def handle_events(self, events: List[pygame.event.Event]):
         key = pygame.key.get_pressed()
-        moved = False
+
         if key[pygame.K_w]:
             self._jump()
-            moved = True
         elif key[pygame.K_a]:
             self.vert_input = -2
         elif key[pygame.K_d]:
@@ -132,10 +136,6 @@ class Pawn(Sprite):
             self.vert_input = 0
         if key[pygame.K_SPACE]:
             self._jump()
-        #if moved:
-            #WebsocketThread.send(PackageSend(header=CodeSend.BallMoved,
-            #                                 body=f"{self.ball.position.x},"
-            #                                      f"{self.ball.position.y}"))
 
     def draw(self, window: Surface):
         if self.bLeftSide:

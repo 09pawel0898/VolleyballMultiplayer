@@ -25,6 +25,16 @@ class GameplayActivity(UserActivity):
                     ball : Sprite = state.ball
                     new_positions = body.split(',')
                     ball.set_position(int(new_positions[0]),int(new_positions[1]))
+                case CodeReceived.StartTheGame:
+                    pass
+                    #set usernames
+                case CodeReceived.InitNewRound:
+                    state.hide_msg_box()
+                    state.init_round(int(body))
+                case CodeReceived.PlayerMoved:
+                    new_positions = body.split(',')
+                    state.gameplay_controller.rival_pawn.set_position(
+                        float(new_positions[0]),float(new_positions[1]))
             return True
 
     def set_state(self, new_state: GameplayActivityState):

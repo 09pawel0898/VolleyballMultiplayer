@@ -31,7 +31,7 @@ class LobbyActivity(UserActivity):
                     WebsocketThread.connect(room_hash)
                     state.show_msg_box("Room created. Waiting..",TextureID.ButtonCancel, state._room_shutdown)
                 else:
-                    state.show_msg_box("Your room already exist.",TextureID.ButtonOk, state._hide_msg_box)
+                    state.show_msg_box("Your room already exist.", TextureID.ButtonOk, state.hide_msg_box)
             if response.response.status == ResponseStatus.ConnectionError:
                 state.show_msg_box("Connection error.")
             elif response.response.status == ResponseStatus.TimeoutError:

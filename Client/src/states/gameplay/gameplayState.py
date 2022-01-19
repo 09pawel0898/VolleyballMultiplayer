@@ -23,6 +23,7 @@ class GameplayState(State):
         self.bInputEnabled = True
         self.bMsgPanelActive = False
         self.bGameStarted = False
+        self.bReadyClicked = False
         self.UIAnimState = UIAnimState.Default
         self.beforeMsgAnimState = self.UIAnimState
         self.possessed_pawn = None
@@ -34,26 +35,25 @@ class GameplayState(State):
     def _init_user(self):
         User.me.activity = GameplayActivity()
         User.me.state = StateID.Gameplay
-        #self.show_msg_box("Press OK when you're ready.",
-        #                  TextureID.ButtonOk,
-        #                  self._startgame_onclick)
-
+        self.show_msg_box("Press OK when you're ready.",
+                          TextureID.ButtonOk,
+                          self._startgame_onclick)
 
     def _init_resources(self):
         textures_to_init={
             #placeholder
-            TextureID.BackgroundLayer0: "res/img/background_layer0.png",
-            TextureID.BackgroundLayer1: "res/img/background_layer1.png",
-            TextureID.LoginPanel: "res/img/login_panel.png",
-            TextureID.RegisterPanel: "res/img/register_panel.png",
-            TextureID.Logo: "res/img/logo.png",
-            TextureID.Clouds: "res/img/clouds.png",
-            TextureID.ButtonSignIn: "res/img/button_signin.png",
-            TextureID.ButtonSignUp: "res/img/button_signup.png",
-            TextureID.ButtonBack: "res/img/button_back.png",
-            TextureID.ButtonRegister: "res/img/button_register.png",
-            TextureID.MessageBox: "res/img/info_panel.png",
-            TextureID.ButtonOk: "res/img/button_ok.png",
+            # TextureID.BackgroundLayer0: "res/img/background_layer0.png",
+            # TextureID.BackgroundLayer1: "res/img/background_layer1.png",
+            # TextureID.LoginPanel: "res/img/login_panel.png",
+            # TextureID.RegisterPanel: "res/img/register_panel.png",
+            # TextureID.Logo: "res/img/logo.png",
+            # TextureID.Clouds: "res/img/clouds.png",
+            # TextureID.ButtonSignIn: "res/img/button_signin.png",
+            # TextureID.ButtonSignUp: "res/img/button_signup.png",
+            # TextureID.ButtonBack: "res/img/button_back.png",
+            # TextureID.ButtonRegister: "res/img/button_register.png",
+            # TextureID.MessageBox: "res/img/info_panel.png",
+            # TextureID.ButtonOk: "res/img/button_ok.png",
             # placeholder
 
             TextureID.Ball: "res/img/ball.png",
@@ -79,8 +79,10 @@ class GameplayState(State):
         #self.widget_manager.get_widget("ButtonLogout").set_callback(self._logout_user_onclick)
 
     def _startgame_onclick(self):
-        WebsocketThread.send(PackageSend(header=CodeSend.StartClicked,
-                                         body=""))
+        if not self.bReadyClicked:
+            WebsocketThread.send(PackageSend(header=CodeSend.StartClicked,
+                                             body=""))
+        self.bReadyClicked = True
 
     def _exit_onclick(self):
         pass
@@ -94,7 +96,7 @@ class GameplayState(State):
         self.msgLabel = Label(Vec2(300,188),"Message",30,font="Agency FB")
         self.msgButton = Button(Vec2(449,253),texture_manager.get_resource(TextureID.ButtonOk))
         self.msgButton.set_position(449, 253)
-        self.msgButton.set_callback(self._hide_msg_box)
+        self.msgButton.set_callback(self.hide_msg_box)
         self.bMsgPanelActive = False
 
     def show_msg_box(self, message, button_texture_id: TextureID, callback):
@@ -104,9 +106,10 @@ class GameplayState(State):
         self.UIAnimState = UIAnimState.MessageBoxShowed
         self.bInputEnabled = True
         self.bMsgPanelActive = True
+        self.bReadyClicked = False
         self.msgLabel.set_text(message)
 
-    def _hide_msg_box(self):
+    def hide_msg_box(self):
         self.UIAnimState = self.beforeMsgAnimState
         self.bInputEnabled = True
         self.bMsgPanelActive = False
@@ -140,24 +143,23 @@ class GameplayState(State):
         texture_manager = self.state_manager.context.texture_manager
 
         #ball
-        self.ball = Ball(
-            texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
-        self.ball.set_size(64,64)
-        self.ball.set_position(200,200)
-
+        self.ball = None
+        #     Ball( texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
+        # self.ball.set_size(64,64)
+        # self.ball.set_position(200,200)
 
         #players
         self.left_pawn = Pawn(0, texture_manager.get_resource(TextureID.Pawn),0,0)
         self.right_pawn = Pawn(1, texture_manager.get_resource(TextureID.Pawn2),0,0)
 
         #DEBUG
-        self.init_round()
+        #self.init_round()
 
     def _set_rival_username(self):
         pass
 
-    def init_round(self):
-        my_side = 0
+    def init_round(self, side: int):
+        my_side = side
         if my_side == 0:
             print("Possess left")
             self.possessed_pawn = self.left_pawn
@@ -182,7 +184,8 @@ class GameplayState(State):
         self.score_panel.draw(window)
 
         #gameplay elements
-        self.ball.draw(window)
+        if self.ball is not None:
+            self.ball.draw(window)
         #pawns
         self.left_pawn.draw(window)
         self.right_pawn.draw(window)
@@ -203,7 +206,6 @@ class GameplayState(State):
 
     def _on_event(self, events: List[pygame.event.Event]) -> None:
         if self.bInputEnabled:
-
             if self.possessed_pawn is not None:
                 self.possessed_pawn.handle_events(events)
 
@@ -220,7 +222,6 @@ class GameplayState(State):
 
     def _update_clouds(self, dt):
         for clouds in self.cloudsPool:
-            print(clouds.position.x,clouds.position.y)
             clouds.move(Vec2(0.07*dt, 0))
             if clouds.position.x > self.context.window.get_width():
                 clouds.set_position(-self.context.window.get_width(), 0)
