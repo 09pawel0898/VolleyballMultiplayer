@@ -1,6 +1,6 @@
 from src.core.states.state import *
 from src.core.states.stateidentifiers import StateID
-from src.core.widgets.button import Button
+from src.core.widgets.button import Button, ButtonBehaviour
 from src.core.widgets.label import Label
 from src.states.gameplay.gameplayActivity import GameplayActivity
 from src.networking.serverAPI.user import User
@@ -62,7 +62,8 @@ class GameplayState(State):
             TextureID.PauseButton: "res/img/pause_button.png",
             TextureID.Grass: "res/img/grass.png",
             TextureID.Pawn: "res/img/pawn.png",
-            TextureID.Pawn2: "res/img/pawn2.png"
+            TextureID.Pawn2: "res/img/pawn2.png",
+            TextureID.ButtonLeave: "res/img/button_leave.png"
         }
         for key in textures_to_init:
             self.context.texture_manager.load_resource(key,textures_to_init[key], Texture)
@@ -70,13 +71,15 @@ class GameplayState(State):
     def _init_widgets(self):
         texture_manager = self.state_manager.context.texture_manager
         #buttons
-        # self.widget_manager.init_widget(
-        #     "ButtonCreate",
-        #     Button(Vec2(66, 120), texture_manager.get_resource(TextureID.ButtonCreate), ButtonBehaviour.SlideRight))
+        #self.widget_manager.init_widget(
+        #     "ButtonLeave",
+        #     Button(Vec2(800, 40), texture_manager.get_resource(TextureID.ButtonLeave), ButtonBehaviour.SlideRight))
         #labels
         self.widget_manager.init_widget(
             "ScoreLabel",
             Label(Vec2(-200,-200),"0:0",36,font="Agency FB"))
+
+        #self.widget_manager.get_widget("ButtonLeave").set_callback(self._leave_room)
 
     def update_score(self, status: int):
         if status == 1:
@@ -100,9 +103,9 @@ class GameplayState(State):
                                              body=""))
         self.bReadyClicked = True
 
-    def _exit_onclick(self):
-        pass
+    def _leave_room(self):
         WebsocketThread.disconnect()
+        self.state_manager.pop_state()
 
     def _init_msg_box(self):
         texture_manager = self.state_manager.context.texture_manager
@@ -243,7 +246,7 @@ class GameplayState(State):
                         self.msgButton.check_for_onclick()
                     else:
                         pass
-                        #self.widget_manager.get_widget("ButtonLogout").check_for_onclick()
+                        #self.widget_manager.get_widget("ButtonLeave").check_for_onclick()
 
     def _on_awake(self) -> None:
         pass

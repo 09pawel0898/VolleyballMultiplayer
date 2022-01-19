@@ -23,7 +23,7 @@ class Ball(Sprite):
 
         #self.bIsRisingUp = False
 
-    def update(self, dt: float, colliders: List[Rectangle]) -> None:
+    def update(self, dt: float, colliders: List[Rectangle], player_left_side: bool) -> None:
         self.radius = self.texture.image.get_rect().height / 2
         if self.D == 0:
             self.rotation /= 1.01
@@ -46,26 +46,30 @@ class Ball(Sprite):
                 self.speed += self.mod
 
         for collider in colliders:
-            self._check_wall_collision(collider)
+            self._check_wall_collision(collider, player_left_side)
         self.rotation /= 1.0005
         self.rotate(-self.D)
 
 
-    def _check_wall_collision(self, rect: Rectangle):
+    def _check_wall_collision(self, rect: Rectangle, player_left_side: bool):
         if rect.orientation == Orientation.Horizontal:
             if rect.in_bounds(self.position.x+self.radius,self.position.y+self.radius):
                 self.speed *= -1
                 if not self.bStopped:
                     if self.position.y > 400:
                         side = ""
-                        if self.position.x < 540:
+                        if self.position.x < 540 and player_left_side:
                             side = 0
-                        elif self.position.x > 540:
+                            WebsocketThread.send(
+                                PackageSend(
+                                    header=CodeSend.BallTouchedFloor,
+                                    body=f"{side}"))
+                        elif self.position.x > 540 and not player_left_side:
                             side = 1
-                        WebsocketThread.send(
-                            PackageSend(
-                                header=CodeSend.BallTouchedFloor,
-                                body=f"{side}"))
+                            WebsocketThread.send(
+                                PackageSend(
+                                    header=CodeSend.BallTouchedFloor,
+                                    body=f"{side}"))
                         self.bStopped = True
         if rect.orientation == Orientation.Vertical:
             if rect.in_bounds(self.position.x-self.radius,self.position.y):

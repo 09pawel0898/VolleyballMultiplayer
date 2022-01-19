@@ -30,3 +30,4 @@ class TextureID(Enum):
     Grass = 27
     Pawn = 28
     Pawn2 = 29
+    ButtonLeave = 30

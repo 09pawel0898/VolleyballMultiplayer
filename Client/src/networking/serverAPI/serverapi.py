@@ -6,7 +6,7 @@ from .schemas import *
 from ..serverRoom.room import *
 from ..serverRoom.schemas import NewRoom
 
-REMOTE = "http://localhost:8000"
+REMOTE = "http://192.168.0.122:8000"
 
 class ResponseStatus(Enum):
     Test = 1
