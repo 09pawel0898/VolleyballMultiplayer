@@ -35,6 +35,13 @@ class GameplayActivity(UserActivity):
                     new_positions = body.split(',')
                     state.gameplay_controller.rival_pawn.set_position(
                         float(new_positions[0]),float(new_positions[1]))
+                case CodeReceived.InitBall:
+                    state.init_ball(int(body))
+                case CodeReceived.BallBounced:
+                    params = body.split(',')
+                    state.ball.set_position(float(params[0]),float(params[1]))
+                    state.ball.speed = float(params[2])
+                    state.ball.D = float(params[3])
             return True
 
     def set_state(self, new_state: GameplayActivityState):

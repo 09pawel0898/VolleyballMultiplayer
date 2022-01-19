@@ -18,7 +18,7 @@ class ResourceManager(Generic[ResType]):
         else:
             raise AssertionError
 
-    def get_resource(self, key: str) -> ResType:
+    def get_resource(self, key) -> ResType:
         assert(key in self.resources)
         return self.resources[key]
 

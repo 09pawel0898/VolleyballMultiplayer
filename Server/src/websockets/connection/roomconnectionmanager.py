@@ -44,18 +44,36 @@ class RoomConnectionManager:
                 if self.start_clicks == 2:
                     self.game_controller.bGameStarted = True
                     await self.game_controller.send_init_round()
+                    await self.game_controller.send_init_ball()
             # case CodeReceived.BallMoved:
             #     await self.broadcast(PackageSend(header=CodeSend.BallMoved, body=body))
+            case CodeReceived.BallBounced:
+                if self._received_from_host(websocket):
+                    await self.game_controller.send_ball_bounced(self.rival.websocket, body)
+                elif self._received_from_rival(websocket):
+                    await self.game_controller.send_ball_bounced(self.host.websocket, body)
+
             case CodeReceived.PlayerMoved:
-                if websocket == self.host.websocket:
+                if self._received_from_host(websocket):
                     await self.send_personal_message(
                         PackageSend(header=CodeSend.PlayerMoved, body=body),
                         self.rival.websocket)
-                elif websocket == self.rival.websocket:
+                elif self._received_from_rival(websocket):
                     await self.send_personal_message(
                         PackageSend(header=CodeSend.PlayerMoved, body=body),
                         self.host.websocket)
 
+    def _received_from_host(self, websocket) ->bool:
+        if websocket == self.host.websocket:
+            return True
+        else:
+            return False
+
+    def _received_from_rival(self, websocket) ->bool:
+        if websocket == self.rival.websocket:
+            return True
+        else:
+            return False
 
     async def send_personal_message(self, package: PackageSend, websocket: WebSocket):
         await websocket.send_text(package.json())

@@ -95,6 +95,7 @@ class Pawn(Sprite):
                               self.position.y + self.speed.y)
 
         if self.prev_position[0] != self.position.x or self.position.y != self.prev_position[1]:
+            #send player moved information
             WebsocketThread.send(PackageSend(header=CodeSend.PlayerMoved,
                                              body=f"{self.position.x},{self.position.y}"))
         self.prev_position = (self.position.x, self.position.y)

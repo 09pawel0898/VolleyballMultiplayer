@@ -29,6 +29,7 @@ class GameplayState(State):
         self.possessed_pawn = None
         self.rival_pawn = None
         self.gameplay_controller = None
+        self.ball = None
         self._init_gameplay_objects()
         self._init_user()
 
@@ -144,9 +145,6 @@ class GameplayState(State):
 
         #ball
         self.ball = None
-        #     Ball( texture_manager.get_resource(TextureID.Ball), origin=Origin.CENTER, position=Vec2(200, 200))
-        # self.ball.set_size(64,64)
-        # self.ball.set_position(200,200)
 
         #players
         self.left_pawn = Pawn(0, texture_manager.get_resource(TextureID.Pawn),0,0)
@@ -171,6 +169,19 @@ class GameplayState(State):
 
         self.gameplay_controller = GameplayController(
             my_side,self.possessed_pawn,self.rival_pawn,self.ball)
+
+    def init_ball(self, side: int):
+        if side == 0:
+            position = Vec2(200,200)
+        else:
+            position = Vec2(700,200)
+
+        self.ball = Ball(
+            self.context.texture_manager.get_resource(TextureID.Ball),
+            origin=Origin.CENTER,
+            position=position)
+        self.ball.set_position(200,200)
+        self.gameplay_controller.add_ball(self.ball)
 
     def _on_render(self) -> None:
         window = self.context.window

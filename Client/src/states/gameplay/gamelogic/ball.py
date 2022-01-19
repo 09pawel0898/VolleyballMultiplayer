@@ -4,6 +4,8 @@ from src.core.resources.sprite import *
 from .rectangle import *
 from typing import List, Tuple
 from src.core.util.utilis import start_delayed
+from src.threads.websocketthread import WebsocketThread
+from src.networking.serverRoom.packages import *
 
 class Ball(Sprite):
     def __init__(self,
@@ -80,6 +82,11 @@ class Ball(Sprite):
                     print(-10)
                 self.D =  (ball_x - player_x)/14.0
                 self.bPlayerInteractionEnabled = False
+                # send ball bounced information
+                WebsocketThread.send(
+                    PackageSend(
+                        header=CodeSend.BallBounced,
+                        body=f"{self.position.x},{self.position.y},{self.speed},{self.D}"))
                 start_delayed(0.5,self._enable_player_interaction)
 
     def _enable_player_interaction(self):

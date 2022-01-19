@@ -9,6 +9,7 @@ class CodeReceived(Enum):
     StartClicked = 3
     BallMoved = 4
     PlayerMoved = 5
+    BallBounced = 6
 
 class CodeSend(Enum):
     Null = 0
@@ -21,6 +22,7 @@ class CodeSend(Enum):
     RivalUsername = 7
     InitNewRound = 8
     PlayerMoved = 9
+    InitBall = 10
 
 class PackageSend(BaseModel):
     header : CodeSend
